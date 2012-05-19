@@ -16,11 +16,11 @@
 include('includes/config.php');
 require_once('includes/facebook.php');
 $facebook = new Facebook(array(
-'appId'   => '321725344534542',
-'secret'  => '86f1e2cc8a3409058fc39f247aa9e2ea',
+'appId'   => '270288849735874',
+'secret'  => '3af6ac2dfe9b2b3aca999eb8791a2484',
 'cookie'  => true
 ));
-$params = array('scope' => 'read_friendlists,friends_photos');
+$params = array();
 $user = $facebook->getUser();
 ?>
 <!DOCTYPE html>
@@ -41,6 +41,12 @@ Start your own debates, invite your friends to express their views, get rated an
 <div id="login">
   <p><a href="<?php echo $facebook->getLoginUrl($params);?>" class="fb-login">Sign in with Facebook</a></p>
 </div>
+<?php
+  if ($user) {
+    $profile = $facebook->api('/me', 'GET');
+    echo 'Hello, '.$profile['name'];
+  }
+?>
 <div id="bottom-pane" class="well">
   <ul>
   <li><a href="#">Join Us</a></li>
