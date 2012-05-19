@@ -13,15 +13,41 @@
    * rebutting a point, supporting a point
    * Each debate has a time frame and then the one with the most points wins (?)
    */
+include('includes/config.php');
+require_once('includes/facebook.php');
+$facebook = new Facebook(array(
+'appId'   => '321725344534542',
+'secret'  => '86f1e2cc8a3409058fc39f247aa9e2ea',
+'cookie'  => true
+));
+$params = array('scope' => 'read_friendlists,friends_photos');
+$user = $facebook->getUser();
 ?>
 <!DOCTYPE html>
 <html>
 <head>
 <title>IIT Debates</title>
-<script src="jquery.min.js" type="text/javascript"></script>
+<script src="includes/jquery.min.js" type="text/javascript"></script>
+<script src="includes/script.js" type="text/javascript"></script>
 <link rel="stylesheet" href="includes/style.css"/>
 </head>
 <body>
-<h1 class="logo">IIT Debates</h1>
+<p class="well">
+Have something to ask? Have someone to pick a bone with? Have to something to settle? Express your point of view?</br></br>
+<span class="welcome">Well, welcome to <b>IIT Debates</b>.</span><br/><br/> 
+Start your own debates, invite your friends to express their views, get rated and compete among your friends. Get invited to popular debates, give your opinions and get noticed. Raise issues close to your heart and your institute and have them settled the <b>right way</b>.
+</p>
+<center>
+<div id="login">
+  <p><a href="<?php echo $facebook->getLoginUrl($params);?>" class="fb-login">Sign in with Facebook</a></p>
+</div>
+<div id="bottom-pane" class="well">
+  <ul>
+  <li><a href="#">Join Us</a></li>
+  <li><a href="#">Feedback</a></li>
+  <li><a href="#">About</a></li>
+  </ul>
+</div>
+</center>
 </body>
 </html>
