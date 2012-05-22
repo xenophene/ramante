@@ -16,12 +16,22 @@
 include('includes/config.php');
 require_once('includes/facebook.php');
 $facebook = new Facebook(array(
-'appId'   => '270288849735874',
-'secret'  => '3af6ac2dfe9b2b3aca999eb8791a2484',
+'appId'   => '253395578066052',
+'secret'  => '23d20951b5546544b2f2e31183e4b5c0',
 'cookie'  => true
 ));
 $params = array();
 $user = $facebook->getUser();
+/* redirect the user, if he is already correctly logged in */
+if ($user) {
+  try {
+    $access_token = $facebook->getAccessToken();
+    $profile = $facebook->api('/me', 'GET');
+    header('Location: home.php');
+  }
+  catch (Exception $e) {
+  }
+}
 ?>
 <!DOCTYPE html>
 <html>
@@ -29,24 +39,18 @@ $user = $facebook->getUser();
 <title>IIT Debates</title>
 <script src="includes/jquery.min.js" type="text/javascript"></script>
 <script src="includes/script.js" type="text/javascript"></script>
-<link rel="stylesheet" href="includes/style.css"/>
+<link rel="stylesheet" href="includes/welcome.css"/>
 </head>
 <body>
 <p class="well">
-Have something to ask? Have someone to pick a bone with? Have to something to settle? Express your point of view?</br></br>
-<span class="welcome">Well, welcome to <b>IIT Debates</b>.</span><br/><br/> 
+Have something to ask? Have someone to pick a bone with? Have to something to settle? Express your point of view? <br/><br/>
+<span class="welcome">Well, welcome to <b>IIT Debates</b>.</span><br/><br/>
 Start your own debates, invite your friends to express their views, get rated and compete among your friends. Get invited to popular debates, give your opinions and get noticed. Raise issues close to your heart and your institute and have them settled the <b>right way</b>.
 </p>
 <center>
 <div id="login">
   <p><a href="<?php echo $facebook->getLoginUrl($params);?>" class="fb-login">Sign in with Facebook</a></p>
 </div>
-<?php
-  if ($user) {
-    $profile = $facebook->api('/me', 'GET');
-    echo 'Hello, '.$profile['name'];
-  }
-?>
 <div id="bottom-pane" class="well">
   <ul>
   <li><a href="#">Join Us</a></li>
