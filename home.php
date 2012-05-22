@@ -26,7 +26,13 @@ if ($user) {
 else {
   header('Location: index.php');
 }
-
+if (array_key_exists('uid', $_GET))
+  $uid = $_GET['uid'];
+else
+  $uid = 0; // compare $uid and $user to check if we render our own page or not
+/* Here we have determined the FB uid of the user. We have also determined 
+   if a request for a particular debater was intended. If this is our own 
+   profile, we will show some editing options. Else, we show the follow button*/
 ?>
 <!--If we are here, we are definitely logged into FB, so we can use it-->
 <!DOCTYPE html>
@@ -42,21 +48,51 @@ else {
 <span class="logo">IIT Debates</span>
 <span class="options">
   <ul>
+  <a href="#" class="notifications"><li>Updates</li></a>
   <a href="<?php echo $facebook->getLogoutUrl($params);?>"><li>Log Out</li></a>
   </ul>
 </span>
 </div>
 <!--The user profile is displayed here. Pic, Score, ...-->
 <div id="profile">
-<a href="<?php echo $profile['url'];?>"><img class="pic" src="<?php echo 'https://graph.facebook.com/'.$user.'/picture?type=large';?>"/></a>
+<a href="<?php echo 'https://facebook.com/'.$profile['username'];?>" target="_blank"><img class="pic" src="<?php echo 'https://graph.facebook.com/'.$user.'/picture?type=normal';?>"/></a>
 <table class="details">
 <tbody>
-<tr>
-<td><?php echo $profile['name'];?></td>
-<td>Honou </td>
+<tr><td class="name"><?php echo $profile['name'];?></td></tr>
+<tr><td><label class="interest">interested in:</label></td><td><?php echo 'Politics, Hostel Mess';?>
+<?php
+  if ($uid == 0 or $user == $uid) {
+    echo '<label class="add"><a href="#">add/change</a></label>';
+  }
+?>
+</td>
 </tr>
+<tr><td><label class="interest">debates started:</label></td><td><?php echo 'thrown challenges';?></td></tr>
+<tr><td><label class="interest">debates won:</label></td><td><?php echo 'accepted challenges';?></td></tr>
 </tbody>
 </table>
+<ul class="engage">
+<?php
+  if ($uid == 0 or $user == $uid) {
+?>
+<li title="start">Start a new debate</li>
+<?php
+  }
+  else { // have the user interact with other's profiles
+?>
+<li title="invite">Invite</li>
+<li title="follow">Follow</li>
+<li title="challenge">Challenge</li>
+<?php
+  }
+?>
+</ul>
+</div>
+<div id="content">
+<div id="past-debates">
+</div>
+<div id="updates">
+</div>
 </div>
 </body>
 </html>
