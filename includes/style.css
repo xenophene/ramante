@@ -1,23 +1,25 @@
 html {
-  background: url('bg.png');
+  /*background: url('dark-bg.jpg');*/
+  background: #fff;
   height: 100%;
 }
 body {
   margin: 0 auto;
   padding: 0px;
   background: #fff;
-  font-family: Georgia, Tahoma, Times New Roman, sans-serif;
-  font-size: 12px;
+  font-size: 13px;
   line-height: 18px;
   color: #333;
   width: 1000px;
   min-height: 100%;
-  -moz-box-shadow: 0 -10px 12px #777;
-  -webkit-box-shadow: 0 -10px 12px #777;
+  /*-moz-box-shadow: 0 -10px 12px #777;
+  -webkit-box-shadow: 0 -10px 12px #777;*/
+  border-left: solid 1px #ccc;
+  border-right: solid 1px #ccc;
   clear: both;
 }
 #header {
-  background: #D14836;
+  background: #0074CC;
   color: #FFF;
   height: 40px;
   position: relative;
@@ -28,8 +30,15 @@ span.logo {
   position: absolute;
   text-align: left;
   left: 50%;
-  margin-left: -84px;
+  margin-left: -67px;
   padding:11px;
+}
+span.logo a {
+  color:#fff;
+  text-decoration: none;
+}
+span.logo a:hover {
+  text-decoration: none;
 }
 span.options {
   position: absolute;
@@ -41,25 +50,21 @@ span.options {
 a {
   text-decoration: none;
   outline: none;
-  color: #333;
 }
 span.options ul {
   list-style: none;
   margin: 0;
-  padding: 11px 0 11px 0;
+  padding: 14px 0 8px 0;
 }
-span.options a {
-  text-decoration: none;
-  outline: none;
-  color: #fff;
-}
-span.options ul li {
+span.options ul a li {
   display: inline;
   text-decoration: none;
-  padding: 13px 9px 13px 9px;
+  padding: 16px 9px 9px 9px;
   margin: 0px;
+  color: #fff;
+  outline: none;
 }
-span.options ul li:hover {
+span.options ul a li:hover {
   background: #333;
 }
 #welcome {
@@ -71,85 +76,110 @@ span.iit {
   color: #D14836;
   font-weight: bold;
 }
-span.welcome {
-  font-family: Georgia;
+span.emph {
   font-size: 30px;
+  margin: 5px 0 5px 0;
 }
 #profile {
-  padding: 20px 20px 20px 20px;
+  padding: 20px;
   clear: both;
   overflow: auto;
   border-bottom: 1px solid #eee;
   position: relative;
 }
-#profile table {
-  padding: 0 10px 0 10px;
-  font-size: 14px;
-  color: #111;
-}
-#profile table tr {
-  padding: 0px;
-  margin: 0px;
-  height: 100%;
-}
 #profile td.name {
   font-weight: bold;
-  color: #D14836;
-  font-size: 14px;
+  color: #0074CC;
+  font-size: 17px;
 }
-#profile label.interest {
+#profile span.interest {
   color: #444;
-  font-size: 11px;
+  font-size: 13px;
   font-style: italic;
+  padding-right: 5px;
 }
-#profile label.add {
+#profile span.add {
+  padding: 0 0 0 5px;
+}
+#profile span.add .interest-confirm, .interest-reject {
+  cursor: pointer;
+}
+#profile span.add a {
+  text-decoration: none;
   color: #c33;
-  font-size: 11px;
+  font-size: 14px;
   font-weight: bold;
-  font-style: italic;
-  padding: 0 0 0 10px;
+  margin: 0 0 0 3px;
+  padding: 2px;
+  border-radius: 4px;
+  -moz-border-radius: 4px;
+  -webkit-border-radius: 4px;
+}
+#profile span.add a:hover {
+  background-color: #e0e0e0;
 }
 #profile .pic {
-  max-height: 200px;
-  max-width: 200px;
+  max-height: 150px;
+  max-width: 150px;
+  min-height: 100px;
+  min-width: 100px;
   border-right: solid 1px #ccc;
   padding-right: 5px;
+  margin-right: 10px;
   float: left;
+}
+#profile div.engage {
+  position: absolute;
+  top: 20px;
+  right: 20px;
+  padding: 0px;
+  margin: 0px;
+}
+#profile button.engage-btn {
+  margin: 3px 0px 3px 0px;
+  width:105px;
 }
 #profile ul.engage {
   list-style: none;
   position: absolute;
-  bottom: 30px;
-  right: 40px;
+  top: 20px;
+  right: 20px;
   padding: 0px;
   margin: 0px;
 }
 #profile ul.engage li {
   display: inline;
-  padding: 11px;
-  font-size: 14px;
-  font-weight: bold;
-  background: #D14836;
-  -webkit-border-radius: 4px;
-  border-radius: 4px;
-  -moz-border-radius: 4px;
-  -webkit-box-shadow: inset 0 1px 1px rgba(0, 0, 0, 0.05);
-  -moz-box-shadow: inset 0 1px 1px rgba(0, 0, 0, 0.05);
-  box-shadow: inset 0 1px 1px rgba(0, 0, 0, 0.05);
-  color: #fff;
-  cursor: pointer;
 }
-#profile ul.engage li:hover {
-  background: #333;
+#profile #debate-details {
+  clear: both;
+  float: left;
+  overflow: auto;
+  max-width: 500px;
+  margin-right: 100px;
+  padding: 3px 20px 0 0;
+  min-height: 100px;
+}
+#profile span.topic {
+  padding: 0 0 5px 0;
+  font-size: 20px;
+  text-shadow: 1px -2px 3px #eee;
+  color: #333;
+}
+#profile span.desc {
+  color: #444;
+  font-size: 13px;
+}
+#profile .d-details {
+  position: absolute;
+  right: 180px;
 }
 #content {
   position: relative;
   padding: 20px;
   clear: both;
-  overflow: auto;
-  min-height: 500px;
+  min-height: 300px;
 }
-#content #past-debates {
+#content #yes {
   float: left;
   top: 0px;
   left: 0px;
@@ -157,116 +187,210 @@ span.welcome {
   margin: 0px;
   width: 50%;
   border-right: 1px solid #eee;
-  min-height: 500px;
+  min-height: 300px;
 }
-#content #updates {
+#content #no {
   float: right;
   position: absolute;
   margin: 0px;
   top: 0px;
   right: 0px;
   width: 50%;
-  min-height: 500px;
+  min-height: 300px;
 }
-button,input,select,textarea {
-  margin: 0;
-  font-size: 100%;
-  vertical-align: middle;
-}
-button,
-input {
-  *overflow: visible;
-  line-height: normal;
-}
-button::-moz-focus-inner,
-input::-moz-focus-inner {
+#content #comments {
   padding: 0;
-  border: 0;
+  margin: 0;
 }
-button,input[type="button"],input[type="reset"],input[type="submit"] {
+#content #yes textarea.yes {
+  border: 1px solid #5ba75b;
+  color: #222;
+  margin: 10px 0 0 20px;
+  width: 400px;
+  font-size: 13px;
+}
+#content .comment-post-btn {
+  line-height: 20px;
+  margin: 10px 0 0 0;
+}
+#content #comment {
+  padding: 0 0 10px 0;
+  margin: 10px 15px 10px 20px;
+  overflow: auto;
+  clear: both;
+  border-bottom: 1px solid #eee;
+}
+#content #comment .author {
+  font-size: 14px;
+  color: #333;
+  font-weight: bold;
+}
+#content #comment .author img.author-pic {
+  height: 25px;
+  width: 25px;
+  padding: 0;
+  margin: 1px 5px 4px 0;
+}
+#content #comment .comment-data {
+  font-size: 13px;
+  color: #555;
+  width: 100px;
+}
+#content #comment .votes {
+  font-style: italic;
+  padding: 0 5px 0 0;
+  font-size: 12px;
+  text-align: right;
+  color: #777;
+  border-right: 1px solid #ccc;
+}
+#content #comment .upvote, .downvote, .support-point, .rebutt-point, .delete-point {
   cursor: pointer;
-  -webkit-appearance: button;
 }
-.well {
-  min-height: 20px;
-  padding: 19px;
-  margin: 10px 25px 10px 25px;
-  background-color: #eee;
-  border: 1px solid #eee;
-  border: 1px solid rgba(0, 0, 0, 0.05);
-  -webkit-border-radius: 4px;
-  -moz-border-radius: 4px;
-  border-radius: 4px;
-  -webkit-box-shadow: inset 0 1px 1px rgba(0, 0, 0, 0.05);
-  -moz-box-shadow: inset 0 1px 1px rgba(0, 0, 0, 0.05);
-  box-shadow: inset 0 1px 1px rgba(0, 0, 0, 0.05);
-  text-align:justify;
+#content #comment .support-point:hover, .rebutt-point:hover, .delete-point:hover {
+  text-decoration: underline;
+}
+#content #no textarea.no {
+  border: 1px solid #da4f49;
+  color: #222;
+  margin: 10px 0 0 20px;
+  width: 80%;
+}
+#content #update {
+  padding: 10px;
+  margin: 0 10px 0 10px;
+  font-size: 13px;
+  border-bottom: 1px solid #eee;
+}
+#content #my-debates {
+  float: left;
+  top: 20px;
+  left: 0px;
+  position: absolute;
+  margin: 0px;
+  width: 50%;
+  border-right: 1px solid #eee;
+  min-height: 300px;
+}
+#content #my-updates {
+  float: right;
+  position: absolute;
+  margin: 0px;
+  top: 20px;
+  right: 0px;
+  width: 50%;
+  min-height: 300px;
+}
+#content span.home-heading {
+  padding: 20px;
+  font-size: 17px;
+  color: #333;
+  font-weight: bold;
+}
+#content .debate-table {
+  position: absolute;
+  left: 20px;
+  top: 40px;
+}
+#content .debate-table thead {
+  font-weight: bold;
+  font-size: 14px;
+}
+#content .debate-table thead, .debate-table td {
+  padding: 0px 15px 5px 0;
+  max-width: 200px;
+}
+#content .debate-table tbody {
+  color: #555;
+  font-size: 13px;
+  font-size: 
 }
 b {
   color: #D14836;
 }
-#welcome {
-  padding: 10px;
-  margin: 15px;
-  text-align:justify;
+#mask {
+  position:absolute;
+  left:0;
+  top:0;
+  z-index:10;
+  background-color:#000;
+  display:none;
 }
-
-
-.fb-login {
-	-moz-box-shadow:inset 0px 1px 0px 0px #bee2f9;
-	-webkit-box-shadow:inset 0px 1px 0px 0px #bee2f9;
-	box-shadow:inset 0px 1px 0px 0px #bee2f9;
-	background:-webkit-gradient( linear, left top, left bottom, color-stop(0.05, #63b8ee), color-stop(1, #468ccf) );
-	background:-moz-linear-gradient( center top, #63b8ee 5%, #468ccf 100% );
-	filter:progid:DXImageTransform.Microsoft.gradient(startColorstr='#63b8ee', endColorstr='#468ccf');
-	background-color:#63b8ee;
-	-moz-border-radius:6px;
-	-webkit-border-radius:6px;
-	border-radius:6px;
-	border:1px solid #3866a3;
-	display:inline-block;
-	color:#0b2d57;
-	font-family:Arial;
-	font-size:15px;
-	font-weight:bold;
-	padding:6px 24px;
-	text-decoration:none;
-	text-shadow:1px 1px 0px #7cacde;
-} .fb-login:hover {
-	background:-webkit-gradient( linear, left top, left bottom, color-stop(0.05, #468ccf), color-stop(1, #63b8ee) );
-	background:-moz-linear-gradient( center top, #468ccf 5%, #63b8ee 100% );
-	filter:progid:DXImageTransform.Microsoft.gradient(startColorstr='#468ccf', endColorstr='#63b8ee');
-	background-color:#468ccf;
-} .fb-login:active {
-	position:relative;
-	top:1px;
-	outline: none;
-} .fb-login.selected {
-	outline: none;
+#start-debate-form {
+  background:#fff;
+  display:none;
+  width:390px;
+  position:absolute;
+  z-index:12;
+  top:0px;
+  left:0px;
+  border-radius: 4px;
+  -moz-border-radius: 4px;
+  -webkit-border-radius: 4px;
+  padding: 0;
+  margin: 0;
+  border: 10px solid #333;
+  overflow: auto;
 }
-#bottom-pane {
-  text-align: center;
-  z-index: 2;
-  bottom: 0px;
-  padding: 5px 0px 2px 0px;
+#start-debate-form #participants, #start-debate-form #participant-ids {
+  display: none;
+}
+#start-debate-form #cancel-debate {
+  display: none;
+  right: 20px;
+  position: absolute;
+}
+.ui-autocomplete {
+	max-height: 80px;
+	overflow-y: auto;
+	/* prevent horizontal scrollbar */
+	overflow-x: hidden;
+	/* add padding to account for vertical scrollbar */
+	padding-right: 20px;
+}
+/* IE 6 doesn't support max-height
+ * we use height instead, but this forces the menu to always be this tall
+ */
+* html .ui-autocomplete {
+	height: 100px;
+}
+p.emph {
+  font-size: 20px;
   margin: 0px;
-  font-size: 16px;
+  text-shadow: 1px -2px 3px #ddd;
+  padding: 5px 0 22px 0;
 }
-#bottom-pane ul {
+form {
+  padding: 0px;
+  margin: 0px;
+}
+textarea {
+  resize: none;
+}
+#overlay {
+  background:#fff;
+  display:none;
+  width:390px;
+  position:absolute;
+  z-index:12;
+  top:0px;
+  left:0px;
+  border-radius: 4px;
+  -moz-border-radius: 4px;
+  -webkit-border-radius: 4px;
+  padding: 0;
+  margin: 0;
+  border: 10px solid #333;
+  overflow: auto;
+}
+#overlay ul {
   list-style: none;
-  margin: 5px 0px 5px 0px;
-  padding: 15px 15px 15px 15px;
+  padding: 20px 0 20px 20px;
+  margin: 0;
 }
-#bottom-pane ul li {
+#overlay ul li {
   display: inline;
-  text-decoration: none;
-  padding: 0px 10px 0px 10px;
-  margin: 0px;
-}
-#bottom-pane ul li a:hover {
-  color:#D14836; 
-  text-decoration: underline;
-}
-a {
-  text-decoration: none;
+  padding: 10px 0 10px 0;
+  font-size: 14px;
+  border-bottom: 1px solid #eee;
 }

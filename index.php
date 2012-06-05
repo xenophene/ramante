@@ -20,7 +20,7 @@ $facebook = new Facebook(array(
 'secret'  => '23d20951b5546544b2f2e31183e4b5c0',
 'cookie'  => true
 ));
-$params = array();
+$params = array('next' => 'http://localhost/iitdebates/');
 $user = $facebook->getUser();
 /* redirect the user, if he is already correctly logged in */
 if ($user) {
@@ -39,25 +39,19 @@ if ($user) {
 <title>IIT Debates</title>
 <script src="includes/jquery.min.js" type="text/javascript"></script>
 <script src="includes/script.js" type="text/javascript"></script>
+<link rel="stylesheet" href="includes/bootstrap/css/bootstrap.min.css"/>
 <link rel="stylesheet" href="includes/welcome.css"/>
 </head>
 <body>
-<p class="well">
-Have something to ask? Have someone to pick a bone with? Have to something to settle? Express your point of view? <br/><br/>
+<div id="desc" class="well">
+Have something to ask? Have someone to pick a bone with? Have something to settle? Where is your point of view? <br/><br/>
 <span class="welcome">Well, welcome to <b>IIT Debates</b>.</span><br/><br/>
-Start your own debates, invite your friends to express their views, get rated and compete among your friends. Get invited to popular debates, give your opinions and get noticed. Raise issues close to your heart and your institute and have them settled the <b>right way</b>.
-</p>
-<center>
-<div id="login">
-  <p><a href="<?php echo $facebook->getLoginUrl($params);?>" class="fb-login">Sign in with Facebook</a></p>
-</div>
-<div id="bottom-pane" class="well">
-  <ul>
-  <li><a href="#">Join Us</a></li>
-  <li><a href="#">Feedback</a></li>
-  <li><a href="#">About</a></li>
-  </ul>
-</div>
-</center>
+Start your own debates, invite your friends to express their views, get rated and compete among your friends. Get invited to popular debates, give your opinions and get noticed. Raise issues close to your heart and your institute and have them settled the <b>right way</b>.<br/><br/>
+  <a href="<?php echo $facebook->getLoginUrl($params);?>" class="btn btn-primary btn-large">Sign in with Facebook</a>
+<ul>
+<li class="first"><a href="#">Join Us</a></li>
+<li class="second"><a href="#">Feedback</a></li>
+<li><a href="#">About</a></li>
+</ul>
 </body>
 </html>
