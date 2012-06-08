@@ -13,6 +13,7 @@
    * rebutting a point, supporting a point
    * Each debate has a time frame and then the one with the most points wins (?)
    */
+ 
 include('includes/config.php');
 require_once('includes/facebook.php');
 $facebook = new Facebook(array(
@@ -32,6 +33,7 @@ if ($user) {
   catch (Exception $e) {
   }
 }
+
 ?>
 <!DOCTYPE html>
 <html>
