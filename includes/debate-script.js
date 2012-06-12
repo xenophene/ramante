@@ -49,21 +49,26 @@ function post_yes() {
   $('#comment-yes').val('');
   $('#post-yes').attr('disabled', 'disabled');
   $('#comment-yes').css('height', '36px');
-  // send an ajax request to db for this comment
-  var request = $.ajax({
-    url: 'post-comment.php',
-    type: 'POST',
-    data: {author: userid, value: yes_comment, debid: debid, foragainst: 1}
-  });
   /* show the just entered comment */
   var comment = '<div id="comment">';
   comment += '<span class="author"><img class="author-pic" src="https://graph.facebook.com/'+userid+'/picture?type=small"/>' + username + '</span>';
   comment += '<br/><span class="comment-data">' + yes_comment + '</span><br/>';
+  comment += '<span class="delete-point votes" title="Delete this point">Delete</span>';
   comment += '</div>';
   $('#yes #comments').prepend(comment);
+  // send an ajax request to db for this comment
+  var request = $.ajax({
+    url: 'post-comment.php',
+    type: 'POST',
+    data: {author: userid, value: yes_comment, debid: debid, foragainst: 1},
+    success: function(data) {
+      $('#yes #comment').first().attr('name', data);
+    }
+  });
   $('#yes #comment').first().hide();
   $('#yes #comment').first().slideDown({duration:'slow',easing: 'easeOutElastic'});
   $("#yes #comment").first().effect("highlight", {}, 3000);
+  $('.delete-point').click(deletePoint);
 }
 function post_no() {
   var no_comment = $('#comment-no').val();
@@ -72,21 +77,26 @@ function post_no() {
   $('#comment-no').val('');
   $('#post-no').attr('disabled', 'disabled');
   $('#comment-no').css('height', '36px');
-  // send an ajax request to db for this comment
-  var request = $.ajax({
-    url: 'post-comment.php',
-    type: 'POST',
-    data: {author: userid, value: no_comment, debid: debid, foragainst: 0}
-  });
   /* show the just entered comment */
   var comment = '<div id="comment">';
   comment += '<span class="author"><img class="author-pic" src="https://graph.facebook.com/'+userid+'/picture?type=small"/>' + username + '</span>';
   comment += '<br/><span class="comment-data">' + no_comment + '</span><br/>';
+  comment += '<span class="delete-point votes" title="Delete this point">Delete</span>';
   comment += '</div>';
   $('#no #comments').prepend(comment);
+  // send an ajax request to db for this comment
+  var request = $.ajax({
+    url: 'post-comment.php',
+    type: 'POST',
+    data: {author: userid, value: no_comment, debid: debid, foragainst: 0},
+    success: function(data) {
+      $('#no #comment').first().attr('name', data);
+    }
+  });
   $('#no #comment').first().hide();
   $('#no #comment').first().slideDown({duration:'slow',easing: 'easeOutElastic'});
   $("#no #comment").first().effect("highlight", {}, 3000);
+  $('.delete-point').click(deletePoint);
 }
 /* support_point operates on a particular point and helps to directly counter
   or support whatever the point was talking about. this helps in a more one-on-one
@@ -108,17 +118,23 @@ function view_participants() {
   /* render the layover and show the list of friends */
   var pnames = participantNames.split(',');
   var pids = participantIds.split(',');
-  console.log(pids);
-  console.log(pnames);
-  var code = '<ul>';
+  var code = '<p style="padding: 20px 20px 10px 20px;" class="emph">Participants</p><ul>';
   for (var i = 0; i < pnames.length; i++) {
     var s = pnames[i][0] == ' ' ? pnames[i].substr(1) : pnames[i];
     var id = pids[i][0] == ' ' ? pids[i].substr(1) : pids[i];
-    code += '<li><img src="https://graph.facebook.com/"' + id + '/picture?type=small" style="padding-right:10px;"/>' + s + '</li>';
+    if (i != pnames.length - 1)
+      code += '<li id="' + id + '"><a target="_blank" href="https://www.facebook.com/profile.php?id=' + id + '"><img id="' + id + '" title="' + s + '" src="https://graph.facebook.com/' + id + '/picture"/></a></li>';
+    else
+      code += '<li id="' + id + '"><a target="_blank" href="https://www.facebook.com/profile.php?id=' + id + '"><img id="' + id + '" title="' + s + ' (Creator)" src="https://graph.facebook.com/' + id + '/picture"/></a></li>';
   }
   code += '</ul>';
   var id = '#overlay';
   $(id).html(code);
+  $('li a img').each(function() {
+    $(this).tooltip({
+      title: $(this).attr('title')
+    });
+  });
   var winH = $(document).height();
   var winW = $(document).width();
   $('#mask').css({'width':winW,'height':winH});
@@ -127,8 +143,60 @@ function view_participants() {
   $(id).css('left', winW/2-$(id).width()/2);
   $(id).show();
 }
+
+/* view followers for this debate */
+function view_followers() {
+  /* render the layover and show the list of friends */
+  var pnames = followerNames.split(',');
+  var pids = followerIds.split(',');
+  var code = '<p style="padding: 20px 20px 10px 20px;" class="emph">Followers</p><ul>';
+  for (var i = 0; i < pnames.length; i++) {
+    var s = pnames[i][0] == ' ' ? pnames[i].substr(1) : pnames[i];
+    if (s == '')
+      continue;
+    var id = pids[i][0] == ' ' ? pids[i].substr(1) : pids[i];
+    code += '<li id="' + id + '"><a target="_blank" href="https://www.facebook.com/profile.php?id=' + id + '"><img id="' + id + '" title="' + s + '" src="https://graph.facebook.com/' + id + '/picture"/></a></li>';
+  }
+  code += '</ul>';
+  var id = '#overlay';
+  $(id).html(code);
+  $('li a img').each(function() {
+    $(this).tooltip({
+      title: $(this).attr('title')
+    });
+  });
+  var winH = $(document).height();
+  var winW = $(document).width();
+  $('#mask').css({'width':winW,'height':winH});
+  $('#mask').fadeTo("fast",0.3);
+  $(id).css('top',  winH/2-$(id).height()/2);
+  $(id).css('left', winW/2-$(id).width()/2);
+  $(id).show();
+}
+function popovers() {
+  $('#invite-to-debate').popover({
+    title: 'Invite friends to debate',
+    content: 'Promote this debate among your friends allowing them to participate and contribute to the debate.',
+    placement: 'left'
+  });
+  $('#follow-debate').popover({
+    title: 'Follow Debate',
+    content: 'Follow this debate to stay updates with who said what on this debate.',
+    placement: 'left'
+  });
+  $('#view-participants').popover({
+    title: 'View Participants',
+    content: 'View the profiles of the people who have been invited to this debate.',
+    placement: 'left'
+  });
+  $('#view-followers').popover({
+    title: 'View Followers',
+    content: 'View the followers of this debate',
+    placement: 'left'
+  });
+}
 $(function() {
-  $('textarea').autogrow();
+  $('textarea').autosize();
   $('.upvote').click(upvote);
   $('.downvote').click(downvote);
   $('.support-point').click(support_point);
@@ -137,6 +205,7 @@ $(function() {
   $('#post-yes').click(post_yes);
   $('#post-no').click(post_no);
   $('#view-participants').click(view_participants);
+  $('#view-followers').click(view_followers);
   $('#mask').click(function () {
     clearOverlay();
 	});
@@ -159,4 +228,5 @@ $(function() {
         $('#post-no').attr('disabled', 'disabled');
     }
   });
+  popovers();
 });

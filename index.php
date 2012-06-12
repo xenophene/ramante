@@ -16,20 +16,21 @@
 include('includes/config.php');
 require_once('includes/facebook.php');
 $facebook = new Facebook(array(
-'appId'   => '253395578066052',
-'secret'  => '23d20951b5546544b2f2e31183e4b5c0',
-'cookie'  => true
+"appId"   => '253395578066052',
+"secret"  => '23d20951b5546544b2f2e31183e4b5c0',
+"cookie"  => false
 ));
 $params = array('next' => 'http://localhost/iitdebates/');
 $user = $facebook->getUser();
 /* redirect the user, if he is already correctly logged in */
 if ($user) {
   try {
-    $access_token = $facebook->getAccessToken();
-    $profile = $facebook->api('/me', 'GET');
+    $profile = $facebook->api('/me');
     header('Location: home.php');
   }
-  catch (Exception $e) {
+  catch (FacebookApiException $e) {
+    error_log($e);
+    $user = null;
   }
 }
 ?>
