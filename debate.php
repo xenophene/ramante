@@ -18,24 +18,23 @@
 include('includes/config.php');
 require_once('includes/facebook.php');
 $facebook = new Facebook(array(
-'appId'   => '253395578066052',
-'secret'  => '23d20951b5546544b2f2e31183e4b5c0',
-'cookie'  => true
+"appId"   => '253395578066052',
+"secret"  => '23d20951b5546544b2f2e31183e4b5c0',
+"cookie"  => false
 ));
 $params = array();
 $user = $facebook->getUser();
 /* send the user to login page if he is not correctly logged in */
 if ($user) {
   try {
-    $access_token = $facebook->getAccessToken();
     $profile = $facebook->api('/me', 'GET');
   }
   catch (FacebookApiException $e) {
-    //header('Location: index.php');
+    header('Location: index.php');
   }
 }
 else {
-  //header('Location: index.php');
+  header('Location: index.php');
 }
 /* is the current user $user a participant? this is true if we have just 
   created this database, else we will figure this out from the db */
@@ -43,14 +42,16 @@ $is_participant = false;
 /* check the incoming POST variable to see if debate ID exists. if not, we 
   should have the other details which are added to the db. if debid exists, 
   we can simply query the db to render the page */
-if (!array_key_exists('debid', $_POST)) { //get the details and add to db
+if (!array_key_exists('debid', $_GET)) { //get the details and add to db
   if (!array_key_exists('debate-topic', $_POST))
     header('Location: home.php');
   $debatetopic = mysql_real_escape_string($_POST['debate-topic']);
   $debatedesc = mysql_real_escape_string($_POST['debate-desc']);
   $debatetheme = mysql_real_escape_string($_POST['debate-theme']);
   $participants = mysql_real_escape_string($_POST['participant-ids'].$user);
-  $participant_names = mysql_real_escape_string($_POST['participants']);//.$profile['name']);
+  $followers = '';
+  $follower_names = '';
+  $participant_names = mysql_real_escape_string($_POST['participants'].$profile['name']);
   $timelimit = mysql_real_escape_string($_POST['time-limit']);
   $debscore = 0;
   $is_participant = true;
@@ -60,9 +61,9 @@ if (!array_key_exists('debid', $_POST)) { //get the details and add to db
   $result = mysql_query($query);
   if (mysql_num_rows($result) == 0) { //create this debate entry
     $query =  "INSERT INTO `debates` (`topic`, `description`, `timelimit`, `themes`,".
-              "`participants`, `creator`) VALUES ".
+              "`participants`, `creator`, `startdate`) VALUES ".
               "('$debatetopic', '$debatedesc', '$timelimit', '$debatetheme', ".
-               "'$participants', '$user')";
+               "'$participants', '$user', '".date('Y,m,d')."')";
     $result = mysql_query($query);
   }
   $query = "SELECT MAX(debid) FROM `debates`";
@@ -70,18 +71,59 @@ if (!array_key_exists('debid', $_POST)) { //get the details and add to db
   $debid = mysql_fetch_row($result);
   $debid = $debid[0];
   $userid = $user;
-  $query = "SELECT * FROM `users` WHERE fbid='$userid'";
-  $result = mysql_query($query);
-  $creator = mysql_fetch_assoc($result);
-  $follower_qty = 0;
-  $query = "SELECT * FROM `comments`, `users` WHERE debid='$debid' AND `author`=`fbid`";
-  $result = mysql_query($query);
-  $comments = array();
-  for ($i = 0; $i < mysql_num_rows($result); $i++) {
-    array_push($comments, mysql_fetch_assoc($result));
-  }
+  $startdate = date('Y,m,d');
 }
 else { // get the details & render the page
+  $debid = $_GET['debid'];
+  $query = "SELECT * FROM `debates` WHERE `debid`='$debid'";
+  $result = mysql_query($query);
+  $debate = mysql_fetch_assoc($result);
+  $userid = $user;
+  // get all the comma separated participant names
+  // check if the current user $userid is a participant
+  $participants = $debate['participants'];
+  $ps = explode(',',$participants);
+  $participant_names = '';
+  foreach($ps as $p) {
+    $is_participant = trim($p) == $user;
+    $result = mysql_query("SELECT * FROM `users` WHERE `fbid`='$p'");
+    $row = mysql_fetch_assoc($result);
+    if ($participant_names == '')
+      $participant_names = $row['name'];
+    else
+      $participant_names = $participant_names . ',' . $row['name'];
+  }
+  $followers = $debate['followers'];
+  $fs = explode(',',$followers);
+  $follower_names = '';
+  foreach($fs as $f) {
+    $p = trim($f);
+    if ($p == '')
+      continue;
+    $result = mysql_query("SELECT * FROM `users` WHERE `fbid`='$p'");
+    $row = mysql_fetch_assoc($result);
+    if ($follower_names == '')
+      $follower_names = $row['name'];
+    else
+      $follower_names = $follower_names . ',' . $row['name'];
+  }
+  $debatetopic = $debate['topic'];
+  $debatedesc = $debate['description'];
+  $timelimit = $debate['timelimit'];
+  $startdate = $debate['startdate'];
+  $debscore = $debate['debscore'];
+  // for now allow this special debate to be editable by all
+  $is_participant = $is_participant or $debid == 160; 
+}
+$query = "SELECT * FROM `users` WHERE fbid='$userid'";
+$result = mysql_query($query);
+$creator = mysql_fetch_assoc($result);
+$follower_qty = 0;
+$query = "SELECT * FROM `comments`, `users` WHERE debid='$debid' AND `author`=`fbid`";
+$result = mysql_query($query);
+$comments = array();
+for ($i = 0; $i < mysql_num_rows($result); $i++) {
+  array_push($comments, mysql_fetch_assoc($result));
 }
 /* echo back important js state variables */
 $creatorname = $creator['name'];
@@ -92,11 +134,13 @@ $creatorname = $creator['name'];
 <?php
 echo "
   <script>
-  var userid = $userid;
-  var debid = $debid;
+  var userid = '$userid';
+  var debid = '$debid';
   var username = '$creatorname';
   var participantNames = '$participant_names';
   var participantIds = '$participants';
+  var followerIds = '$followers';
+  var followerNames = '$follower_names';
   </script>
 ";
 ?>
@@ -105,7 +149,7 @@ echo "
 <link rel="stylesheet" href="includes/style.css"/>
 <script src="includes/jquery-1.7.2.min.js" type="text/javascript"></script>
 <script src="includes/js/jquery-ui-min.js" type="text/javascript"></script>
-<script src="includes/js/jquery.autogrow-textarea.js" type="text/javascript"></script>
+<script src="includes/js/jquery.autosize-min.js" type="text/javascript"></script>
 <script src="includes/jquery.easing.1.3.js" type="text/javascript"></script>
 <script src="includes/bootstrap/js/bootstrap.min.js" type="text/javascript"></script>
 <script src="includes/debate-script.js" type="text/javascript"></script>
@@ -133,10 +177,26 @@ echo "
 </div>
 <table class="d-details">
 <tbody>
+  <tr><td><span class="interest">Created by:</span></td>
+  <td>
+  <?php
+    echo '<a href="home.php?uid='.$creator['uid'].'">'.$creator['name'].'</a>';
+  ?>
+  </td>
+  </tr>
   <tr><td><span class="interest">Debate Points:</span></td><td><?php echo $debscore;?></td></tr>
-  <tr><td><span class="interest">Created by:</span></td><td><?php echo $creator['name'];?></td></tr>
   <tr><td><span class="interest"># Followers:</span></td><td><?php echo $follower_qty;?></td></tr>
-  <tr><td><span class="interest">Time Left:</span></td><td><?php echo $timelimit;?> days</td></tr>
+  <tr><td><span class="interest">Time Left:</span></td>
+  <td>
+  <?php 
+    $days = (strtotime(date("Y-m-d")) - strtotime($startdate)) / (60 * 60 * 24);
+    if ($timelimit - $days > 0)
+      echo ($timelimit - $days).' days';
+    else
+      echo 'Closed';
+  ?>
+  </td>
+  </tr>
 </tbody>
 </table>
 <div class="engage">
@@ -160,8 +220,15 @@ echo "
 </div>
 <div id="content">
   <div id="yes">
+  <?php
+  // show these boxes only if I am a participant
+  if ($is_participant):
+  ?>
   <textarea class="yes" id="comment-yes" placeholder="Speak for the motion" rows=2></textarea>
   <button id="post-yes" class="btn btn-success comment-post-btn" disabled>Post</button>
+  <?php
+    endif;
+  ?>
   <div id="comments">
   <?php
     /* echo the comments from the comments array for the for side */
@@ -209,8 +276,14 @@ echo "
   </div>
   </div>
   <div id="no">
+  <?php
+    if ($is_participant):
+  ?>
   <textarea class="no" id="comment-no" placeholder="Speak against the motion" rows=2></textarea>
   <button id="post-no" class="btn btn-danger comment-post-btn" disabled>Post</button>
+  <?php
+    endif;
+  ?>
   <div id="comments">
   <?php
     for ($i = 0; $i < sizeof($comments); $i++) {

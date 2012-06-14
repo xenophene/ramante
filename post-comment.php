@@ -9,4 +9,7 @@ $foragainst = $_POST['foragainst'];
 $query = "INSERT INTO `comments` (`author`, `value`, `debid`, `foragainst`)".
          " VALUES ('$author', '$value', '$debid', '$foragainst')";
 $result = mysql_query($query);
+$query = "SELECT MAX(comid) FROM `comments`";
+$result = mysql_fetch_assoc(mysql_query($query));
+echo $result['MAX(comid)'];
 ?>
