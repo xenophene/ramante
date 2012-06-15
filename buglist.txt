@@ -1,1 +1,3 @@
-We will list all the bugs here !
+We will list all the bugs here.
+1. facebook logout doesn't work
+2. notification

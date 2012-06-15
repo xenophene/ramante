@@ -28,6 +28,7 @@ if ($user) {
   try {
     $profile = $facebook->api('/me');
     header('Location: home.php');
+    echo $user;
   }
   catch (FacebookApiException $e) {
     error_log($e);
