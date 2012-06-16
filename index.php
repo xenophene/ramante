@@ -21,14 +21,18 @@ $facebook = new Facebook(array(
 "secret"  => '23d20951b5546544b2f2e31183e4b5c0',
 "cookie"  => false
 ));
+
 $params = array('next' => 'http://localhost/iitdebates/');
+
 $user = $facebook->getUser();
+
+
 /* redirect the user, if he is already correctly logged in */
 if ($user) {
   try {
     $profile = $facebook->api('/me');
     header('Location: home.php');
-    echo $user;
+//    echo $user;
   }
   catch (FacebookApiException $e) {
     error_log($e);

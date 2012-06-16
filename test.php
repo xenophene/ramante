@@ -10,7 +10,6 @@
   "cookie"  => false
   ));
   
-  
 
   $user_id = $facebook->getUser();
 ?>
@@ -24,14 +23,9 @@
       // We have a user ID, so probably a logged in user.
       // If not, we'll get an exception, which we handle below.
       try {
-        $ret_obj = $facebook->api('/me/feed', 'POST',
+        $ret_obj = $facebook->api('/653499724/iit_debates:create', 'POST',
                                     array(
-                                     
-                                      'message' => 'my debate',
-                                      'message_tags' => 'the first debate',
-                                      'name' => 'name is iitdebates',
-                                      'description' => 'this is the way to describe things.',
-                                      'story' => 'this is the story'
+                                     'debate'=>'http://localhost/iitdebates/debate.php'
                                  ));
         echo '<pre>Post ID: ' . $ret_obj['id'] . '</pre>';
 

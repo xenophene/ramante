@@ -19,7 +19,7 @@ $params = array(
     );
     */
 $params = array('next' => 'http://localhost/iitdebates/logout.php');    
- global $user;
+// global $user;
  $user = $facebook->getUser();
 /* $user is the fbid which we get if the user is logged in. once the user
    accepts to add iitdebates, we also assign him a $userid which is our id */
@@ -30,9 +30,9 @@ if ($user) {
        that his/her entry is in our users table */
     $query = "SELECT * FROM `users` WHERE `fbid`=$user";
     $result = mysql_query($query);
-    global $user;
-    echo $user;
-    echo "alsdkasld";
+//    global $user;
+  //  echo $user;
+    //echo "alsdkasld";
     if (mysql_num_rows($result) == 0) { // add an entry
       $profile = $facebook->api('/me');
       $name = $profile['name'];
@@ -54,17 +54,17 @@ if ($user) {
     $result = mysql_query($query);
     $userprofile = mysql_fetch_assoc($result);
     $userid = $userprofile['uid'];
-    echo $userid;
-    echo "je";
+  //  echo $userid;
+//    echo "je";
   }
   catch (FacebookApiException $e) {
-//    header('Location: index.php');
-    echo $user;
-    echo "redirect";
+    header('Location: index.php');
+  //  echo $user;
+//    echo "redirect";
   }
 }
 else {
-    echo $user;
+//    echo $user;
     
   header('Location: index.php');
 }

@@ -8,7 +8,7 @@ $facebook = new Facebook(array(
 "cookie"  => false
 ));
 
-session_destroy()
+session_destroy();
 ?>
 
 <html>

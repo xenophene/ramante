@@ -130,7 +130,14 @@ $creatorname = $creator['name'];
 ?>
 <!DOCTYPE html>
 <html>
-<head>
+
+<head prefix="og: http://ogp.me/ns# fb: http://ogp.me/ns/fb# iit_debates: http://ogp.me/ns/fb/iit_debates#">
+ <meta property="fb:app_id" content="253395578066052" /> 
+ <meta property="og:type"   content="iit_debates:debate" /> 
+ <meta property="og:url"    content="http://localhost/iitdebates/debate.php" /> 
+ <meta property="og:title"  content="Sample Debate" /> 
+ <meta property="og:image"  content="https://s-static.ak.fbcdn.net/images/devsite/attachment_blank.png" />
+    
 <?php
 echo "
   <script>
