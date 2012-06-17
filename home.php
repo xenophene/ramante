@@ -4,14 +4,15 @@
    * Else, show the menu elements to start a debate, show ongoing debates, 
    * user profile which has points, etc(as will be decided)
    */
-include('includes/config.php');
 require_once('includes/facebook.php');
+include('includes/config.php');
+include('includes/aux_functions.php');
 $facebook = new Facebook(array(
-"appId"   => '253395578066052',
-"secret"  => '23d20951b5546544b2f2e31183e4b5c0',
-"cookie"  => false
+  "appId"   => '253395578066052',
+  "secret"  => '23d20951b5546544b2f2e31183e4b5c0',
+  "cookie"  => false
 ));
-$params = array();
+$params = array('next' => 'http://localhost/iitdebates/logout.php');
 $user = $facebook->getUser();
 /* $user is the fbid which we get if the user is logged in. once the user
    accepts to add iitdebates, we also assign him a $userid which is our id */
@@ -57,7 +58,7 @@ if (array_key_exists('uid', $_GET))
   $uid = $_GET['uid'];
 else
   $uid = 0; // compare $uid and $user to check if we render our own page or not
-if ($userid == $uid)
+if ($userid == $uid and $uid)
   header('Location: home.php');
 if ($uid) {
   $query = "SELECT * FROM `users` WHERE `uid`='$uid'";
@@ -83,6 +84,8 @@ else {
 }
 $name = $userprofile['name'];
 $fbid = $userprofile['fbid'];
+$followerIds = getUserFollowers($userid);
+$followerNames = namesFromIds(explode(',', $followerIds));
 /* Here we have determined the FB uid of the user. We have also determined 
    if a request for a particular debater was intended. If this is our own 
    profile, we will show some editing options. Else, we show the follow button*/
@@ -106,6 +109,8 @@ echo "<script>
   var uid = '$uid';
   var user = '$user';
   var userid = '$userid';
+  var followerIds = '$followerIds';
+  var followerNames = '$followerNames';
   </script>
 ";
 ?>
@@ -113,9 +118,21 @@ echo "<script>
 <body>
 <div id="header">
 <span class="logo"><a href="home.php">IIT Debates</a></span>
+<span class="fb-ju-ab">
+  <ul>
+  <li><a href="#" id="fb">Feedback</a></li>
+  <li><a href="#" id="ju">Join Us</a></li>
+  <li><a href="#" id="ab">About</a></li>
+  </ul>
+</span>
 <span class="options">
   <ul>
-  <a href="<?php echo $facebook->getLogoutUrl($params);?>"><li>Log Out</li></a>
+  <li class="search-form">
+  <input class="navbar-search" type="text" id="friend-search" data-provide="typeahead" placeholder="Search" autocomplete="off">
+  <div class="icon-search icon-black"></div>
+  </li>
+  <li class="log-out-link"><a href="home.php">Home</a></li>
+  <li class="log-out-link" id="log-out-btn"><a href="<?php echo $facebook->getLogoutUrl($params);?>">Log Out</a></li>
   </ul>
 </span>
 </div>
@@ -126,27 +143,35 @@ echo "<script>
 <tbody>
 <tr><td class="name"><?php echo $name;?></td></tr>
 <tr><td class="contain-interest"><span id="interested-in" class="interest">interested in:</span></td>
-<td class="interest-elements"><?php if ($userprofile != null) echo $userprofile['interests'];?></td><td class="interest-elements-p"><span class="add">+</span></td>
+<td class="interest-elements"><?php if ($userprofile != null) echo $userprofile['interests'];?></td>
+<?php
+ if (!$uid): 
+?>
+<td class="interest-elements-p"><span class="add">+</span></td>
+<?php
+  endif;
+?>
 </tr>
 <tr><td><span id="debating-points" class="interest">debating points:</span></td><td class="debate-score"><?php if ($userprofile != null) echo $userprofile['score'];?></td></tr>
 <!--<tr><td><span id="debates-won" class="interest">debates won:</span></td><td><?php if ($userprofile != null) echo $userprofile['debateswon'];?></td></tr>-->
 </tbody>
 </table>
-<ul class="engage">
-<?php
-  if ($uid == 0 or $user == $uid):
-?>
-<li title="Start a new debate" id="start" class="btn btn-primary">Start a new debate</li>
-<?php
-  else: // have the user interact with other's profiles
-?>
-<li title="Invite to my debates" id="invite" class="btn btn-primary">Invite</li>
-<li title="Follow this user's activity" id="follow" class="<?php echo $follower;?>"><?php echo $follower_text;?></li>
-<li title="Challenge to a debate" id="challenge" class="btn btn-primary">Challenge</li>
-<?php
-  endif;
-?>
-</ul>
+  <div class="engage">
+  <?php
+    if ($uid == 0 or $user == $uid):
+  ?>
+  <button title="Start a new debate" id="start" class="btn btn-primary usr-engage-btn">Start a new debate</button><br/>
+  <button title="View my followers" id="my-followers" class="btn btn-primary usr-engage-btn">My Followers</button>
+  <?php
+    else: // have the user interact with other's profiles
+  ?>
+  <button title="Invite to my debates" id="invite" class="btn btn-primary usr-engage-btn2">Invite</button><br/>
+  <button title="Follow this user's activity" id="follow" class="<?php echo $follower;?>"><?php echo $follower_text;?></button><br/>
+  <button title="Challenge to a debate" id="challenge" class="btn btn-primary usr-engage-btn2">Challenge</button>
+  <?php
+    endif;
+  ?>
+  </div>
 </div>
 <div id="content">
 <!--The main canvas to show all activity for the user in the form of updates.
@@ -175,11 +200,13 @@ else {
   $you = "You don't ";
   if ($uid)
     $you = $name. " doesn't ";
-  echo "<thead></thead><tbody><tr><td>".$you."have any ongoing debates right now</td></tr>";
+  echo '<thead></thead><tbody><tr id="nill"><td>'.$you.'have any ongoing debates right now</td></tr>';
 }
 while ($row = mysql_fetch_array($result)) {
   $debid = $row['debid'];
-  echo '<tr id="'.$debid.'"><td>'.$row['topic'].'</td>'.
+  echo '<tr>'.
+       '<td class="dname" id="'.$debid.'"><a href="debate.php?debid='.$debid.
+       '">'.$row['topic'].'</a></td>'.
        '<td>'.$row['debscore'].'</td>'.
        '<td>'.$row['rating'].'</td>'.
        '<td>';
@@ -189,7 +216,11 @@ while ($row = mysql_fetch_array($result)) {
     echo ($daylimit - $days).' days';
   else
     echo 'Closed';
-  echo '</td></tr>';
+  echo '</td>';
+  if (!$uid) {
+    echo '<td style="padding:8px 4px 8px 0;"><a href="#" class="close delete-debate">&times;</a></td>';
+  }
+  echo '</tr>';
 }
 ?>
 </tbody>
@@ -244,7 +275,7 @@ endif;
 </div>
 <div id="mask"></div>
 <div id="start-debate-form" class="window">
-  <form class="well" action="debate.php" method="POST" style="margin: 0px;">
+  <form class="well" action="debate-create.php" method="POST" style="margin: 0px;">
     <p class="emph">Start a new debate</p>
     <input type="text" title="Debate's Topic" name="debate-topic" id="debate-topic" class="input-xxlarge" placeholder="Debate Topic" autocomplete="off"/>
     <textarea class="input-xxlarge" title="Debate's Description" name="debate-desc" id="debate-desc" placeholder="Debate Description" rows="4" autocomplete="off"></textarea>
@@ -257,10 +288,14 @@ endif;
 		  <input type="radio" id="time-limit-3" name="time-limit" value="30" /><label for="time-limit-3">30 days</label>
 		  <input type="radio" id="time-limit-4" name="time-limit" value="40" /><label for="time-limit-4">40 days</label>
 	  </div>
-	  <br/>
-    <a class="btn btn-primary" id="start-debate" disabled>Start</a>
-    <a class="btn" id="cancel-debate">Cancel</a>
+	  <div id="radio2" title="Set the debate privacy">
+	    <input type="radio" id="privacy-1" name="privacy" value="0"  checked="checked" /><label for="privacy-1">Public Debate</label>
+		  <input type="radio" id="privacy-2" name="privacy" value="1" /><label for="privacy-2">Private Debate</label>
+	  </div>
+    <button class="btn btn-primary" id="start-debate" disabled>Start</button>
+    <a href="#" id="cancel-debate" class="close">&times;</a>
   </form>
 </div>
+<div id="overlay" class="window"></div>
 </body>
 </html>

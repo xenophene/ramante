@@ -1,6 +1,10 @@
+/* Some Global data variables that are used throughout */
 var friendNames = null;
 var themes = Array('IIT Mess', 'IIT Politics', 'IIT Academics', 'IIT Hostels', 'IIT Cultural Events', 'IIT Sports Events', 'Nation & Economy');
 var friendIds = null;
+var names = Array();
+var uids = Array();
+/*****************************************/
 function split( val ) {
   return val.split( /,\s*/ );
 }
@@ -184,6 +188,7 @@ function reShowAddButton(interests) {
   $('.interest-reject').unbind();
   $('.interest-elements-p').html('<span class="add">+</span>');
   $('.interest-elements').html(interests);
+  $('.interest-elements').effect("highlight", {}, 3000);
   $('span.add').click(modifyInterests);
   $('.add').tooltip({
     title: 'Modify/Add Debating interests'
@@ -218,6 +223,55 @@ function modifyInterests() {
   $('.interest-reject').click(function() {
     reShowAddButton(interests);
   });
+}
+/* delete Debate will take the debate and remove myself from the participant list */
+function debateDelete() {
+  var debid = $(this).parent().parent().children('td.dname').attr('id');
+  $.ajax({
+    url: 'remove-debate.php',
+    type: 'POST',
+    data: {debid:debid, user:user}
+  });
+  $(this).parent().parent().fadeOut();
+}
+/* clear Overlay */
+function clearOverlay() {
+  $('.window').hide();
+  $('#mask').hide();
+}
+/* show my followers */
+function myFollowers() {
+  var pnames = followerNames.split(',');
+  var pids = followerIds.split(',');
+  var code = '<p style="padding: 20px 20px 10px 20px;" class="emph">Followers</p><ul>';
+  for (var i = 0; i < pnames.length; i++) {
+    var s = pnames[i][0] == ' ' ? pnames[i].substr(1) : pnames[i];
+    if (s == '')
+      continue;
+    var id = pids[i][0] == ' ' ? pids[i].substr(1) : pids[i];
+    code += '<li id="' + id + '"><a target="_blank" href="https://www.facebook.com/profile.php?id=' + id + '"><img id="' + id + '" title="' + s + '" src="https://graph.facebook.com/' + id + '/picture"/></a></li>';
+  }
+  code += '</ul>';
+  code += '<a href="#" id="cancel-overlay" class="close">&times;</a>';
+  var id = '#overlay';
+  $(id).html(code);
+  if ($(id).height() < 200)
+    $(id).css('height', '200px');
+  if ($(id).width() < 200)
+    $(id).css('width', '200px');
+  $('li a img').each(function() {
+    $(this).tooltip({
+      title: $(this).attr('title')
+    });
+  });
+  $('#cancel-overlay').click(clearOverlay);
+  var winH = $(document).height();
+  var winW = $(document).width();
+  $('#mask').css({'width':winW,'height':winH});
+  $('#mask').fadeTo("fast",0.3);
+  $(id).css('top',  winH/2-$(id).height()/2);
+  $(id).css('left', winW/2-$(id).width()/2);
+  $(id).show();
 }
 function popovers() {
   $('.debate-table').popover({
@@ -261,20 +315,71 @@ function popovers() {
   $('#radio').popover({
     content: 'Set a time limit for this debate after which no participant will be able to make further comments.'
   });
+  $('#radio2').popover({
+    content: 'Any debater can participate & comment in a public debate. Private debates require invites from participants.'
+  });
   $('#invite').popover({
     content: 'Invite this person to one my ongoing debates',
-    placement: 'bottom'
+    placement: 'left'
   });
   $('#follow').popover({
     content: "Follow this person's debates and activity",
+    placement: 'left'
+  });
+  $('#my-followers').popover({
+    content: "View My Followers",
     placement: 'bottom'
   });
   $('#challenge').popover({
     content: "Challenge this person to a new debate",
-    placement: 'bottom'
+    placement: 'left'
   });
   $('.add').tooltip({
     title: 'Modify/Add Debating interests'
+  });
+  $('#friend-search').tooltip({
+    title: 'Search Debaters on IIT Debates',
+    placement: 'left'
+  });
+  $('.delete-debate').tooltip({
+    title: 'Remove myself as a participant',
+    placement: 'left'
+  });
+}
+/* Set up the user search functionality by querying through AJAX the user base */
+function searchSetup() {
+  $.ajax({
+    url: 'get-users.php',
+    type: 'GET',
+    dataType: 'json',
+    success: function(data) {
+      for (var i = 0; i < data.length; i++) {
+        names.push(data[i].name);
+        uids.push(data[i].uid);
+      }
+      $('#friend-search').typeahead({
+        source: names,
+        items: 5
+      });
+    }
+  });
+  $('#friend-search').keypress(function(evt) {
+    if (evt.which != 13)
+      return true;
+    else {
+      var sname = $(this).val();
+      var i = $.inArray(sname, names);
+      if (i != -1)
+        location.href = 'home.php?uid=' + uids[i];
+    }
+  });
+  $('.icon-search').click(function() {
+    var sname = $(this).parent().children('input').val();
+    var i = $.inArray(sname, names);
+    if (i != -1)
+      location.href = 'home.php?uid=' + uids[i];
+    else
+      $(this).parent().children('input').val('');
   });
 }
 $(function() {
@@ -289,7 +394,9 @@ $(function() {
     if ($('#debate-topic').val().length > 5 && $('#participants').val().length > 3)
       $('#start-debate').removeAttr('disabled');
   });
-  $('.debate-table tr').click(function() {
+  $('.debate-table td.dname').click(function() {
+    if ($(this).attr('id') == 'nill')
+      return;
     location.href = 'debate.php?debid=' + $(this).attr('id');
   });
   $('#start-debate').click(submitDebateForm);
@@ -297,6 +404,10 @@ $(function() {
   $('#challenge').click(defineChallengeDebate);
   $('#follow').click(followUser);
   $('#radio').buttonset();
+  $('#radio2').buttonset();
   $('span.add').click(modifyInterests);
+  $('.delete-debate').click(debateDelete);
+  $('#my-followers').click(myFollowers);
   popovers();
+  searchSetup();
 });

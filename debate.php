@@ -16,13 +16,14 @@
   * -------------------------------------------------------------
   */
 include('includes/config.php');
+include('includes/aux_functions.php');
 require_once('includes/facebook.php');
+$params = array('next' => 'http://localhost/iitdebates/logout.php');
 $facebook = new Facebook(array(
-"appId"   => '253395578066052',
-"secret"  => '23d20951b5546544b2f2e31183e4b5c0',
-"cookie"  => false
+  "appId"   => '253395578066052',
+  "secret"  => '23d20951b5546544b2f2e31183e4b5c0',
+  "cookie"  => false
 ));
-$params = array();
 $user = $facebook->getUser();
 /* send the user to login page if he is not correctly logged in */
 if ($user) {
@@ -43,75 +44,40 @@ $is_participant = false;
   should have the other details which are added to the db. if debid exists, 
   we can simply query the db to render the page */
 if (!array_key_exists('debid', $_GET)) { //get the details and add to db
-  if (!array_key_exists('debate-topic', $_POST))
-    header('Location: home.php');
-  $debatetopic = mysql_real_escape_string($_POST['debate-topic']);
-  $debatedesc = mysql_real_escape_string($_POST['debate-desc']);
-  $debatetheme = mysql_real_escape_string($_POST['debate-theme']);
-  $participants = mysql_real_escape_string($_POST['participant-ids'].$user);
-  $followers = '';
-  $follower_names = '';
-  $participant_names = mysql_real_escape_string($_POST['participants'].$profile['name']);
-  $timelimit = mysql_real_escape_string($_POST['time-limit']);
-  $debscore = 0;
-  $is_participant = true;
-  /* check if such an entry exists, else make an entry to the db */
-  $query = "SELECT * FROM `debates` WHERE `topic`='$debatetopic' AND ".
-           "`creator`='$user'";
-  $result = mysql_query($query);
-  if (mysql_num_rows($result) == 0) { //create this debate entry
-    $query =  "INSERT INTO `debates` (`topic`, `description`, `timelimit`, `themes`,".
-              "`participants`, `creator`, `startdate`) VALUES ".
-              "('$debatetopic', '$debatedesc', '$timelimit', '$debatetheme', ".
-               "'$participants', '$user', '".date('Y,m,d')."')";
-    $result = mysql_query($query);
-  }
-  $query = "SELECT MAX(debid) FROM `debates`";
-  $result = mysql_query($query);
-  $debid = mysql_fetch_row($result);
-  $debid = $debid[0];
-  $userid = $user;
-  $startdate = date('Y,m,d');
+  header('Location: home.php');
 }
 else { // get the details & render the page
   $debid = $_GET['debid'];
   $query = "SELECT * FROM `debates` WHERE `debid`='$debid'";
   $result = mysql_query($query);
   $debate = mysql_fetch_assoc($result);
-  $userid = $user;
+  $userid = $debate['creator'];
   // get all the comma separated participant names
   // check if the current user $userid is a participant
   $participants = $debate['participants'];
   $ps = explode(',',$participants);
   $participant_names = '';
+  $is_participant = false;
   foreach($ps as $p) {
-    $is_participant = trim($p) == $user;
-    $result = mysql_query("SELECT * FROM `users` WHERE `fbid`='$p'");
-    $row = mysql_fetch_assoc($result);
-    if ($participant_names == '')
-      $participant_names = $row['name'];
-    else
-      $participant_names = $participant_names . ',' . $row['name'];
+    if (trim($p) == $user)
+      $is_participant = true;
   }
+  $participant_names = namesFromIds($ps);
   $followers = $debate['followers'];
   $fs = explode(',',$followers);
-  $follower_names = '';
+  $follower_names = namesFromIds($fs);
+  $following = false;
   foreach($fs as $f) {
     $p = trim($f);
-    if ($p == '')
-      continue;
-    $result = mysql_query("SELECT * FROM `users` WHERE `fbid`='$p'");
-    $row = mysql_fetch_assoc($result);
-    if ($follower_names == '')
-      $follower_names = $row['name'];
-    else
-      $follower_names = $follower_names . ',' . $row['name'];
+    if ($p == $user)
+      $following = true;
   }
   $debatetopic = $debate['topic'];
   $debatedesc = $debate['description'];
   $timelimit = $debate['timelimit'];
   $startdate = $debate['startdate'];
   $debscore = $debate['debscore'];
+  $privacy = $debate['privacy'];
   // for now allow this special debate to be editable by all
   $is_participant = $is_participant or $debid == 160; 
 }
@@ -119,12 +85,16 @@ $query = "SELECT * FROM `users` WHERE fbid='$userid'";
 $result = mysql_query($query);
 $creator = mysql_fetch_assoc($result);
 $follower_qty = 0;
-$query = "SELECT * FROM `comments`, `users` WHERE debid='$debid' AND `author`=`fbid`";
-$result = mysql_query($query);
-$comments = array();
-for ($i = 0; $i < mysql_num_rows($result); $i++) {
-  array_push($comments, mysql_fetch_assoc($result));
+$comments = commentsArray($debid);
+if ($following) {
+  $followingClass = 'btn-danger disabled';
+  $followingText = 'Following';
 }
+else {
+  $followingClass = 'btn-primary';
+  $followingText = 'Follow';
+}
+$myname = $profile['name'];
 /* echo back important js state variables */
 $creatorname = $creator['name'];
 ?>
@@ -134,8 +104,10 @@ $creatorname = $creator['name'];
 <?php
 echo "
   <script>
+  var user = '$user';
   var userid = '$userid';
   var debid = '$debid';
+  var myname = '$myname';
   var username = '$creatorname';
   var participantNames = '$participant_names';
   var participantIds = '$participants';
@@ -158,10 +130,21 @@ echo "
 <body>
 <div id="header">
 <span class="logo"><a href="home.php">IIT Debates</a></span>
+<span class="fb-ju-ab">
+  <ul>
+  <li><a href="#" id="fb">Feedback</a></li>
+  <li><a href="#" id="ju">Join Us</a></li>
+  <li><a href="#" id="ab">About</a></li>
+  </ul>
+</span>
 <span class="options">
   <ul>
-  <a href="home.php"><li>Home</li></a>
-  <a href="<?php echo $facebook->getLogoutUrl($params);?>"><li>Log Out</li></a>
+  <li class="search-form">
+  <input class="navbar-search" type="text" id="friend-search" data-provide="typeahead" placeholder="Search" autocomplete="off">
+  <div class="icon-search icon-black"></div>
+  </li>
+  <li class="log-out-link"><a href="home.php">Home</a></li>
+  <li class="log-out-link"><a href="<?php echo $facebook->getLogoutUrl($params);?>">Log Out</a></li>
   </ul>
 </span>
 </div>
@@ -205,24 +188,24 @@ echo "
     follow button here. */
   if (!$is_participant) {
 ?>
-<button title="Follow Debate" id="follow-debate" class="btn btn-primary engage-btn">Follow</button><br/>
+<a title="Follow Debate" id="follow-debate" class="btn <?php echo $followingClass;?> engage-btn"><?php echo $followingText;?></a><br/>
 <?php
   }
   else {
 ?>
-<button title="Invite friends to this debate" id="invite-to-debate" class="btn btn-primary engage-btn">Invite Friends</button><br/>
+<a title="Invite friends to this debate" id="invite-to-debate" class="btn btn-primary engage-btn">Invite Friends</a><br/>
 <?php
   }
 ?>
-<button title="See all participants" id="view-participants" class="btn btn-primary engage-btn">Participants</button><br/>
-<button title="See all followers" id="view-followers" class="btn btn-primary engage-btn">Followers</button>
+<a title="See all participants" id="view-participants" class="btn btn-primary engage-btn">Participants</a><br/>
+<a title="See all followers" id="view-followers" class="btn btn-primary engage-btn">Followers</a>
 </div>
 </div>
 <div id="content">
   <div id="yes">
   <?php
-  // show these boxes only if I am a participant
-  if ($is_participant):
+  // show these boxes only if I am a participant or * this is a public debate *
+  if ($is_participant or !$privacy):
   ?>
   <textarea class="yes" id="comment-yes" placeholder="Speak for the motion" rows=2></textarea>
   <button id="post-yes" class="btn btn-success comment-post-btn" disabled>Post</button>
@@ -234,40 +217,14 @@ echo "
     /* echo the comments from the comments array for the for side */
     for ($i = 0; $i < sizeof($comments); $i++) {
       $comment = $comments[$i];
+      $authorUid = $comment['author'];
+      $authorName = $comment['name'];
       if ($comment['foragainst'] == 1) {
-        echo '
-        <div id="comment" name="'.$comment['comid'].'">
-        <span class="author"><img class="author-pic" src="https://graph.facebook.com/'.$userid.'/picture?type=small"/>'.$creator['name'].'</span>
-        <br/>
-        <span class="comment-data">'.$comment['value'].'</span>
-        <br/>';
-        $upvotes = sizeof(explode(',', $comment['upvotes']));
-        $downvotes = sizeof(explode(',', $comment['downvotes']));
-        echo '
-        <span class="votes">'.($upvotes - $downvotes).' votes</span>';
+        commentInfo($comment, $authorUid, $authorName);
+        voteTally($comment['upvotes'], $comment['downvotes']);
         /* only show the upvote/downvote if comment was NOT posted by me & 
            I have not already upvoted or downvoted this comment */
-        $dontShow = false;
-        if ($comment['author'] == $userid) {
-          $dontShow = true;
-          echo '
-          <span class="delete-point votes" title="Delete this point">Delete</span>';
-        }
-        foreach(explode(',', $comment['upvotes']) as $upvoter) {
-          if ($userid == $upvoter)
-            $dontShow = true;
-        }
-        foreach(explode(',', $comment['downvotes']) as $downvoter) {
-          if ($userid == $downvoter)
-            $dontShow = true;
-        }
-        if (!$dontShow) {
-          echo '
-          <span class="support-point votes" title="Support this point">Support</span>
-          <span class="rebutt-point votes" title="Rebutt this point">Rebutt</span>
-          <span class="upvote icon-arrow-up" title="Vote Up"></span>
-          <span class="downvote icon-arrow-down" title="Vote Down"></span>';
-        }
+        deleteSupportVote($comment, $user);
         echo '
         </div>';
       }
@@ -277,7 +234,7 @@ echo "
   </div>
   <div id="no">
   <?php
-    if ($is_participant):
+    if ($is_participant or !$privacy):
   ?>
   <textarea class="no" id="comment-no" placeholder="Speak against the motion" rows=2></textarea>
   <button id="post-no" class="btn btn-danger comment-post-btn" disabled>Post</button>
@@ -288,40 +245,14 @@ echo "
   <?php
     for ($i = 0; $i < sizeof($comments); $i++) {
       $comment = $comments[$i];
+      $authorUid = $comment['author'];
+      $authorName = $comment['name'];
       if ($comment['foragainst'] == 0) {
-        echo '
-        <div id="comment" name="'.$comment['comid'].'">
-        <span class="author"><img class="author-pic" src="https://graph.facebook.com/'.$userid.'/picture?type=small"/>'.$creator['name'].'</span>
-        <br/>
-        <span class="comment-data">'.$comment['value'].'</span>
-        <br/>';
-        $upvotes = sizeof(explode(',', $comment['upvotes']));
-        $downvotes = sizeof(explode(',', $comment['downvotes']));
-        echo '
-        <span class="votes">'.($upvotes - $downvotes).' votes</span>';
+        commentInfo($comment, $authorUid, $authorName);
+        voteTally($comment['upvotes'], $comment['downvotes']);
         /* only show the upvote/downvote if comment was NOT posted by me & 
            I have not already upvoted or downvoted this comment */
-        $dontShow = false;
-        if ($comment['author'] == $userid) {
-          $dontShow = true;
-          echo '
-          <span class="delete-point votes" title="Delete this point">Delete</span>';
-        }
-        foreach(explode(',', $comment['upvotes']) as $upvoter) {
-          if ($userid == $upvoter)
-            $dontShow = true;
-        }
-        foreach(explode(',', $comment['downvotes']) as $downvoter) {
-          if ($userid == $downvoter)
-            $dontShow = true;
-        }
-        if (!$dontShow) {
-          echo '
-          <span class="support-point votes" title="Support this point">Support</span>
-          <span class="rebutt-point votes" title="Rebutt this point">Rebutt</span>
-          <span class="upvote icon-arrow-up" title="Vote Up"></span>
-          <span class="downvote icon-arrow-down" title="Vote Down"></span>';
-        }
+        deleteSupportVote($comment, $user);
         echo '
         </div>';
       }
@@ -331,7 +262,6 @@ echo "
   </div>
 </div>
 <div id="mask"></div>
-<div id="overlay" class="window">
-</div>
+<div id="overlay" class="window"></div>
 </body>
 </html>

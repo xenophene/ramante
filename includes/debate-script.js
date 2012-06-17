@@ -1,3 +1,5 @@
+var names = Array();
+var uids = Array();
 /* upvote listens to an upvote request on a comment, so as to increase the
    vote count of the selected comment on the debate in question from the 
    current user, visible only if the user has not already logged in  */
@@ -12,7 +14,7 @@ function upvote() {
   var request = $.ajax({
     url: 'post-vote.php',
     type: 'POST',
-    data: {comid: comid, userid: userid, upvote: 1}
+    data: {comid: comid, userid: user, upvote: 1}
   });
 }
 function downvote() {
@@ -26,7 +28,7 @@ function downvote() {
   $.ajax({
     url: 'post-vote.php',
     type: 'POST',
-    data: {comid: comid, userid: userid, upvote: 0}
+    data: {comid: comid, userid: user, upvote: 0}
   });
 }
 /* delete the comment that was added by me */
@@ -51,7 +53,7 @@ function post_yes() {
   $('#comment-yes').css('height', '36px');
   /* show the just entered comment */
   var comment = '<div id="comment">';
-  comment += '<span class="author"><img class="author-pic" src="https://graph.facebook.com/'+userid+'/picture?type=small"/>' + username + '</span>';
+  comment += '<span class="author"><img class="author-pic" src="https://graph.facebook.com/'+user+'/picture?type=small"/>' + myname + '</span>';
   comment += '<br/><span class="comment-data">' + yes_comment + '</span><br/>';
   comment += '<span class="delete-point votes" title="Delete this point">Delete</span>';
   comment += '</div>';
@@ -60,7 +62,7 @@ function post_yes() {
   var request = $.ajax({
     url: 'post-comment.php',
     type: 'POST',
-    data: {author: userid, value: yes_comment, debid: debid, foragainst: 1},
+    data: {author: user, value: yes_comment, debid: debid, foragainst: 1},
     success: function(data) {
       $('#yes #comment').first().attr('name', data);
     }
@@ -79,7 +81,7 @@ function post_no() {
   $('#comment-no').css('height', '36px');
   /* show the just entered comment */
   var comment = '<div id="comment">';
-  comment += '<span class="author"><img class="author-pic" src="https://graph.facebook.com/'+userid+'/picture?type=small"/>' + username + '</span>';
+  comment += '<span class="author"><img class="author-pic" src="https://graph.facebook.com/'+user+'/picture?type=small"/>' + myname + '</span>';
   comment += '<br/><span class="comment-data">' + no_comment + '</span><br/>';
   comment += '<span class="delete-point votes" title="Delete this point">Delete</span>';
   comment += '</div>';
@@ -88,7 +90,7 @@ function post_no() {
   var request = $.ajax({
     url: 'post-comment.php',
     type: 'POST',
-    data: {author: userid, value: no_comment, debid: debid, foragainst: 0},
+    data: {author: user, value: no_comment, debid: debid, foragainst: 0},
     success: function(data) {
       $('#no #comment').first().attr('name', data);
     }
@@ -128,13 +130,19 @@ function view_participants() {
       code += '<li id="' + id + '"><a target="_blank" href="https://www.facebook.com/profile.php?id=' + id + '"><img id="' + id + '" title="' + s + ' (Creator)" src="https://graph.facebook.com/' + id + '/picture"/></a></li>';
   }
   code += '</ul>';
+  code += '<a href="#" id="cancel-overlay" class="close">&times;</a>';
   var id = '#overlay';
   $(id).html(code);
+  if ($(id).height() < 200)
+    $(id).css('height', '200px');
+  if ($(id).width() < 200)
+    $(id).css('width', '200px');
   $('li a img').each(function() {
     $(this).tooltip({
       title: $(this).attr('title')
     });
   });
+  $('#cancel-overlay').click(clearOverlay);
   var winH = $(document).height();
   var winW = $(document).width();
   $('#mask').css({'width':winW,'height':winH});
@@ -158,13 +166,19 @@ function view_followers() {
     code += '<li id="' + id + '"><a target="_blank" href="https://www.facebook.com/profile.php?id=' + id + '"><img id="' + id + '" title="' + s + '" src="https://graph.facebook.com/' + id + '/picture"/></a></li>';
   }
   code += '</ul>';
+  code += '<a href="#" id="cancel-overlay" class="close">&times;</a>';
   var id = '#overlay';
   $(id).html(code);
+  if ($(id).height() < 200)
+    $(id).css('height', '200px');
+  if ($(id).width() < 200)
+    $(id).css('width', '200px');
   $('li a img').each(function() {
     $(this).tooltip({
       title: $(this).attr('title')
     });
   });
+  $('#cancel-overlay').click(clearOverlay);
   var winH = $(document).height();
   var winW = $(document).width();
   $('#mask').css({'width':winW,'height':winH});
@@ -195,6 +209,57 @@ function popovers() {
     placement: 'left'
   });
 }
+/* follow debate */
+function followDebate() {
+  if ($(this).attr('class') == 'btn btn-primary engage-btn') {
+    $(this).removeClass('btn-primary');
+    $(this).addClass('btn-danger');
+    $(this).addClass('disabled');
+    $(this).html('Following');
+    /* send follow AJAX request */
+    $.ajax({
+      url: 'follow-debate.php',
+      type: 'POST',
+      data: {follower: user, debid: debid}
+    });
+  }
+}
+/* Set up the user search functionality by querying through AJAX the user base */
+function searchSetup() {
+  $.ajax({
+    url: 'get-users.php',
+    type: 'GET',
+    dataType: 'json',
+    success: function(data) {
+      for (var i = 0; i < data.length; i++) {
+        names.push(data[i].name);
+        uids.push(data[i].uid);
+      }
+      $('#friend-search').typeahead({
+        source: names,
+        items: 5
+      });
+    }
+  });
+  $('#friend-search').keypress(function(evt) {
+    if (evt.which != 13)
+      return true;
+    else {
+      var sname = $(this).val();
+      var i = $.inArray(sname, names);
+      if (i != -1)
+        location.href = 'home.php?uid=' + uids[i];
+    }
+  });
+  $('.icon-search').click(function() {
+    var sname = $(this).parent().children('input').val();
+    var i = $.inArray(sname, names);
+    if (i != -1)
+      location.href = 'home.php?uid=' + uids[i];
+    else
+      $(this).parent().children('input').val('');
+  });
+}
 $(function() {
   $('textarea').autosize();
   $('.upvote').click(upvote);
@@ -206,6 +271,7 @@ $(function() {
   $('#post-no').click(post_no);
   $('#view-participants').click(view_participants);
   $('#view-followers').click(view_followers);
+  $('#follow-debate').click(followDebate);
   $('#mask').click(function () {
     clearOverlay();
 	});
@@ -229,4 +295,5 @@ $(function() {
     }
   });
   popovers();
+  searchSetup();
 });
