@@ -84,8 +84,12 @@ else {
 }
 $name = $userprofile['name'];
 $fbid = $userprofile['fbid'];
-$followerIds = getUserFollowers($userid);
-$followerNames = namesFromIds(explode(',', $followerIds));
+$followerDetails = getUserFollowers($userid);
+$followerIds = $followerDetails[0];
+$followerNames = $followerDetails[1];
+$followeeDetails = getUserFollowees($user);
+$followeeIds = $followeeDetails[0];
+$followeeNames = $followeeDetails[1];
 /* Here we have determined the FB uid of the user. We have also determined 
    if a request for a particular debater was intended. If this is our own 
    profile, we will show some editing options. Else, we show the follow button*/
@@ -99,6 +103,7 @@ $followerNames = namesFromIds(explode(',', $followerIds));
 <link rel="stylesheet" href="includes/css/jquery-ui.css"/>
 <link rel="stylesheet" href="includes/css/jquery.tagit.css"/>
 <link rel="stylesheet" href="includes/style.css"/>
+<link rel="icon" href="includes/favicon.ico"/>
 <script src="includes/jquery-1.7.2.min.js" type="text/javascript"></script>
 <script src="includes/bootstrap/js/bootstrap.min.js" type="text/javascript"></script>
 <script src="includes/js/jquery-ui-min.js" type="text/javascript"></script>
@@ -111,6 +116,8 @@ echo "<script>
   var userid = '$userid';
   var followerIds = '$followerIds';
   var followerNames = '$followerNames';
+  var followeeIds = '$followeeIds';
+  var followeeNames = '$followeeNames';
   </script>
 ";
 ?>
@@ -161,11 +168,12 @@ echo "<script>
     if ($uid == 0 or $user == $uid):
   ?>
   <button title="Start a new debate" id="start" class="btn btn-primary usr-engage-btn">Start a new debate</button><br/>
-  <button title="View my followers" id="my-followers" class="btn btn-primary usr-engage-btn">My Followers</button>
+  <button title="View my followers" id="my-followers" class="btn btn-primary usr-engage-btn">My Followers</button><br/>
+  <button title="View my followees" id="my-followees" class="btn btn-primary usr-engage-btn">My Followees</button>
   <?php
     else: // have the user interact with other's profiles
   ?>
-  <button title="Invite to my debates" id="invite" class="btn btn-primary usr-engage-btn2">Invite</button><br/>
+  <!--<button title="Invite to my debates" id="invite" class="btn btn-primary usr-engage-btn2">Invite</button><br/>-->
   <button title="Follow this user's activity" id="follow" class="<?php echo $follower;?>"><?php echo $follower_text;?></button><br/>
   <button title="Challenge to a debate" id="challenge" class="btn btn-primary usr-engage-btn2">Challenge</button>
   <?php
@@ -267,7 +275,7 @@ while ($row = mysql_fetch_array($result)) {
 <?php
 else:
   echo '<div id="update">';
-  echo "You don't have the permission to view ".$userprofile['name']."'s updates.";
+  echo "You don't have permission to view ".$userprofile['name']."'s updates.";
   echo '</div>';
 endif;
 ?>

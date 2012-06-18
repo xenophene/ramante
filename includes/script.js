@@ -226,6 +226,7 @@ function modifyInterests() {
 }
 /* delete Debate will take the debate and remove myself from the participant list */
 function debateDelete() {
+  $('.delete-debate').tooltip('hide');
   var debid = $(this).parent().parent().children('td.dname').attr('id');
   $.ajax({
     url: 'remove-debate.php',
@@ -233,11 +234,49 @@ function debateDelete() {
     data: {debid:debid, user:user}
   });
   $(this).parent().parent().fadeOut();
+  $(this).parent().parent().remove();
+  if (!$('.debate-table tbody').children().size()) { // remove the tbody
+    $('.debate-table tbody').append('<tr id="nill"><td>You ' + "don't have any ongoing debates right now</td></tr>");
+    $('.debate-table thead').html('');
+  }
 }
 /* clear Overlay */
 function clearOverlay() {
   $('.window').hide();
   $('#mask').hide();
+}
+function renderOverlay(id, code) {
+  $(id).html(code);
+  $('li a img').each(function() {
+    $(this).tooltip({
+      title: $(this).attr('title')
+    });
+  });
+  $('#cancel-overlay').click(clearOverlay);
+  var winH = $(document).height();
+  var winW = $(document).width();
+  $('#mask').css({'width':winW,'height':winH});
+  $('#mask').fadeTo("fast",0.3);
+  $(id).css('top',  winH/2-$(id).height()/2);
+  $(id).css('left', winW/2-$(id).width()/2);
+  $(id).show();
+}
+/* show my followees */
+function myFollowees() {
+  var pnames = followeeNames.split(',');
+  var pids = followeeIds.split(',');
+  var code = '<p style="padding: 20px 20px 10px 20px;" class="emph">Followees</p><ul>';
+  for (var i = 0; i < pnames.length; i++) {
+    var s = pnames[i][0] == ' ' ? pnames[i].substr(1) : pnames[i];
+    if (s == '')
+      continue;
+    var id = pids[i][0] == ' ' ? pids[i].substr(1) : pids[i];
+    code += '<li id="' + id + '"><a target="_blank" href="https://www.facebook.com/profile.php?id=' + id + '"><img id="' + id + '" title="' + s + '" src="https://graph.facebook.com/' + id + '/picture"/></a></li>';
+  }
+  code += '</ul>';
+  code += '<a href="#" id="cancel-overlay" class="close">&times;</a>';
+  var id = '#overlay';
+  renderOverlay(id, code);
 }
 /* show my followers */
 function myFollowers() {
@@ -254,24 +293,7 @@ function myFollowers() {
   code += '</ul>';
   code += '<a href="#" id="cancel-overlay" class="close">&times;</a>';
   var id = '#overlay';
-  $(id).html(code);
-  if ($(id).height() < 200)
-    $(id).css('height', '200px');
-  if ($(id).width() < 200)
-    $(id).css('width', '200px');
-  $('li a img').each(function() {
-    $(this).tooltip({
-      title: $(this).attr('title')
-    });
-  });
-  $('#cancel-overlay').click(clearOverlay);
-  var winH = $(document).height();
-  var winW = $(document).width();
-  $('#mask').css({'width':winW,'height':winH});
-  $('#mask').fadeTo("fast",0.3);
-  $(id).css('top',  winH/2-$(id).height()/2);
-  $(id).css('left', winW/2-$(id).width()/2);
-  $(id).show();
+  renderOverlay(id, code);
 }
 function popovers() {
   $('.debate-table').popover({
@@ -328,6 +350,10 @@ function popovers() {
   });
   $('#my-followers').popover({
     content: "View My Followers",
+    placement: 'bottom'
+  });
+  $('#my-followees').popover({
+    content: "People who I am following",
     placement: 'bottom'
   });
   $('#challenge').popover({
@@ -408,6 +434,7 @@ $(function() {
   $('span.add').click(modifyInterests);
   $('.delete-debate').click(debateDelete);
   $('#my-followers').click(myFollowers);
+  $('#my-followees').click(myFollowees);
   popovers();
   searchSetup();
 });

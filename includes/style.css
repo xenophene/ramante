@@ -16,7 +16,6 @@ body {
   -webkit-box-shadow: 0 -10px 12px #777;*/
   border-left: solid 1px #ccc;
   border-right: solid 1px #ccc;
-  clear: both;
 }
 #header {
   background: #0074CC;
@@ -67,7 +66,7 @@ span.options ul, span.fb-ju-ab ul {
 span.options ul li, span.fb-ju-ab ul li {
   display: inline;
   text-decoration: none;
-  padding: 16px 4px 9px 4px;
+  padding: 16px 4px 7px 4px;
   margin: 0px;
   color: #fff;
   outline: none;
@@ -219,9 +218,7 @@ td.interest-elements-p:hover {
 #content {
   position: relative;
   padding: 20px;
-  clear: both;
-  display: block;
-  min-height: 300px;
+  min-height: 100%;
 }
 #content #yes {
   float: left;
@@ -423,6 +420,8 @@ textarea {
   background:#fff;
   display:none;
   max-width:390px;
+  min-height: 200px;
+  min-width: 200px;
   position:absolute;
   z-index:12;
   top:0px;

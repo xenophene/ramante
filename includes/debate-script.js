@@ -42,6 +42,14 @@ function deletePoint() {
     data: {comid: comid}
   });
 }
+function commentHtml(user, myname, comment_value) {
+  var comment = '<div id="comment">';
+  comment += '<span class="author"><img class="author-pic" src="https://graph.facebook.com/' + user + '/picture?type=small"/>' + myname + '</span>';
+  comment += '<br/><span class="comment-data">' + comment_value + '</span><br/>';
+  comment += '<span class="delete-point votes" title="Delete this point">Delete</span>';
+  comment += '</div>';
+  return comment;
+}
 /* will look at the support point box, and if somethere will add it to the db
    and render it on the screen at the top even if there are higher votes above */
 function post_yes() {
@@ -52,11 +60,7 @@ function post_yes() {
   $('#post-yes').attr('disabled', 'disabled');
   $('#comment-yes').css('height', '36px');
   /* show the just entered comment */
-  var comment = '<div id="comment">';
-  comment += '<span class="author"><img class="author-pic" src="https://graph.facebook.com/'+user+'/picture?type=small"/>' + myname + '</span>';
-  comment += '<br/><span class="comment-data">' + yes_comment + '</span><br/>';
-  comment += '<span class="delete-point votes" title="Delete this point">Delete</span>';
-  comment += '</div>';
+  var comment = commentHtml(user, myname, yes_comment);
   $('#yes #comments').prepend(comment);
   // send an ajax request to db for this comment
   var request = $.ajax({
@@ -71,6 +75,8 @@ function post_yes() {
   $('#yes #comment').first().slideDown({duration:'slow',easing: 'easeOutElastic'});
   $("#yes #comment").first().effect("highlight", {}, 3000);
   $('.delete-point').click(deletePoint);
+  $('.support-point').click(support_point);
+  $('.rebutt-point').click(rebutt_point);
 }
 function post_no() {
   var no_comment = $('#comment-no').val();
@@ -80,11 +86,7 @@ function post_no() {
   $('#post-no').attr('disabled', 'disabled');
   $('#comment-no').css('height', '36px');
   /* show the just entered comment */
-  var comment = '<div id="comment">';
-  comment += '<span class="author"><img class="author-pic" src="https://graph.facebook.com/'+user+'/picture?type=small"/>' + myname + '</span>';
-  comment += '<br/><span class="comment-data">' + no_comment + '</span><br/>';
-  comment += '<span class="delete-point votes" title="Delete this point">Delete</span>';
-  comment += '</div>';
+  var comment = commentHtml(user, myname, no_comment);
   $('#no #comments').prepend(comment);
   // send an ajax request to db for this comment
   var request = $.ajax({
@@ -102,12 +104,25 @@ function post_no() {
 }
 /* support_point operates on a particular point and helps to directly counter
   or support whatever the point was talking about. this helps in a more one-on-one
-  interaction which can be more fruitful for the user */
+  interaction which can be more fruitful for the user. basically on clicking any one
+  we will simply scroll up and focus on the corresponding textbox */
 function support_point() {
-  $(this).parent().append('<textarea class="yes" id="support-comment" placeholder="Support this point" rows=2></textarea>');
+  $('html').animate({
+	    scrollTop: 0
+    }, 800);
+  if ($(this).parent().parent().parent().attr('id') == 'yes')
+    $('#comment-yes').focus();
+  else
+    $('#comment-no').focus();
 }
 function rebutt_point() {
-  $(this).parent().append('<textarea class="no" id="rebutt-comment" placeholder="Rebutt this point" rows=2></textarea>');
+  $(document).animate({
+      scrollTop: 0
+    }, 800);
+  if ($(this).parent().parent().parent().attr('id') == 'yes')
+    $('#comment-no').focus();
+  else
+    $('#comment-yes').focus();
 }
 function clearOverlay() {
   $('.window').hide();
@@ -115,28 +130,8 @@ function clearOverlay() {
   $('#support-comment').hide();
   $('#rebutt-comment').hide();
 }
-/* view participants for this debate */
-function view_participants() {
-  /* render the layover and show the list of friends */
-  var pnames = participantNames.split(',');
-  var pids = participantIds.split(',');
-  var code = '<p style="padding: 20px 20px 10px 20px;" class="emph">Participants</p><ul>';
-  for (var i = 0; i < pnames.length; i++) {
-    var s = pnames[i][0] == ' ' ? pnames[i].substr(1) : pnames[i];
-    var id = pids[i][0] == ' ' ? pids[i].substr(1) : pids[i];
-    if (i != pnames.length - 1)
-      code += '<li id="' + id + '"><a target="_blank" href="https://www.facebook.com/profile.php?id=' + id + '"><img id="' + id + '" title="' + s + '" src="https://graph.facebook.com/' + id + '/picture"/></a></li>';
-    else
-      code += '<li id="' + id + '"><a target="_blank" href="https://www.facebook.com/profile.php?id=' + id + '"><img id="' + id + '" title="' + s + ' (Creator)" src="https://graph.facebook.com/' + id + '/picture"/></a></li>';
-  }
-  code += '</ul>';
-  code += '<a href="#" id="cancel-overlay" class="close">&times;</a>';
-  var id = '#overlay';
+function renderOverlay(id, code) {
   $(id).html(code);
-  if ($(id).height() < 200)
-    $(id).css('height', '200px');
-  if ($(id).width() < 200)
-    $(id).css('width', '200px');
   $('li a img').each(function() {
     $(this).tooltip({
       title: $(this).attr('title')
@@ -150,6 +145,25 @@ function view_participants() {
   $(id).css('top',  winH/2-$(id).height()/2);
   $(id).css('left', winW/2-$(id).width()/2);
   $(id).show();
+}
+
+/* view participants for this debate */
+function view_participants() {
+  /* render the layover and show the list of friends */
+  var pnames = participantNames.split(',');
+  var pids = participantIds.split(',');
+  var code = '<p style="padding: 20px 20px 10px 20px;" class="emph">Participants</p><ul>';
+  for (var i = 0; i < pnames.length; i++) {
+    var s = pnames[i][0] == ' ' ? pnames[i].substr(1) : pnames[i];
+    var id = pids[i][0] == ' ' ? pids[i].substr(1) : pids[i];
+    if (s == '' || id == '')
+      continue;
+    code += '<li id="' + id + '"><a target="_blank" href="https://www.facebook.com/profile.php?id=' + id + '"><img id="' + id + '" title="' + s + '" src="https://graph.facebook.com/' + id + '/picture"/></a></li>';
+  }
+  code += '</ul>';
+  code += '<a href="#" id="cancel-overlay" class="close">&times;</a>';
+  var id = '#overlay';
+  renderOverlay(id, code);
 }
 
 /* view followers for this debate */
@@ -168,24 +182,7 @@ function view_followers() {
   code += '</ul>';
   code += '<a href="#" id="cancel-overlay" class="close">&times;</a>';
   var id = '#overlay';
-  $(id).html(code);
-  if ($(id).height() < 200)
-    $(id).css('height', '200px');
-  if ($(id).width() < 200)
-    $(id).css('width', '200px');
-  $('li a img').each(function() {
-    $(this).tooltip({
-      title: $(this).attr('title')
-    });
-  });
-  $('#cancel-overlay').click(clearOverlay);
-  var winH = $(document).height();
-  var winW = $(document).width();
-  $('#mask').css({'width':winW,'height':winH});
-  $('#mask').fadeTo("fast",0.3);
-  $(id).css('top',  winH/2-$(id).height()/2);
-  $(id).css('left', winW/2-$(id).width()/2);
-  $(id).show();
+  renderOverlay(id, code);
 }
 function popovers() {
   $('#invite-to-debate').popover({
@@ -296,4 +293,16 @@ $(function() {
   });
   popovers();
   searchSetup();
+  $('#tinfo').scroll(function () {
+    if ($(this).scrollTop() > 50)
+	    $('#back-top').fadeIn();
+    else
+	    $('#back-top').fadeOut();
+  });
+  $('#back-top a').click(function () {
+    $('#tinfo').animate({
+	    scrollTop: 0
+    }, 800);
+    return false;
+  });
 });

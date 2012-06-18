@@ -41,16 +41,29 @@ function addUsers($pids, $pnames) {
 }
 /* Using IITD uid assigned, we compute all the followers of this uid. */
 function getUserFollowers($userid) {
-  $query = "SELECT * FROM `follower` WHERE `uid`='$userid'";
+  $query = "SELECT `fbid`, `name` FROM `follower`, `users` ".
+           "WHERE `follower`.`uid`='$userid' AND `users`.`fbid`=`follower`.`follower`";
   $result = mysql_query($query);
   $followerIds = '';
+  $followerNames = '';
   while ($row = mysql_fetch_assoc($result)) {
-    if ($followerIds == '')
-      $followerIds = $row['follower'];
-    else
-      $followerIds = $followerIds . ',' . $row['follower'];
+    $followerIds = $followerIds . ',' . $row['fbid'];
+    $followerNames = $followerNames . ',' . $row['name'];
   }
-  return $followerIds;
+  return array(substr($followerIds, 1), substr($followerNames, 1));
+}
+/* return an array of fbids and their names of the followees of this user */
+function getUserFollowees($user) {
+  $query = "SELECT `fbid`, `name` FROM `follower`, `users` ".
+           "WHERE `follower`='$user' AND `follower`.`uid`=`users`.`uid`";
+  $result = mysql_query($query);
+  $followeeIds = '';
+  $followeeNames = '';
+  while ($row = mysql_fetch_assoc($result)) {
+    $followeeIds = $followeeIds . ',' . $row['fbid'];
+    $followeeNames = $followeeNames . ',' . $row['name'];
+  }
+  return array(substr($followeeIds, 1), substr($followeeNames, 1));
 }
 /* returns the current vote tally */
 function voteCount($upvotes, $downvotes) {

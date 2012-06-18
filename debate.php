@@ -66,6 +66,7 @@ else { // get the details & render the page
   $followers = $debate['followers'];
   $fs = explode(',',$followers);
   $follower_names = namesFromIds($fs);
+  $follower_qty = sizeof($fs);
   $following = false;
   foreach($fs as $f) {
     $p = trim($f);
@@ -84,7 +85,6 @@ else { // get the details & render the page
 $query = "SELECT * FROM `users` WHERE fbid='$userid'";
 $result = mysql_query($query);
 $creator = mysql_fetch_assoc($result);
-$follower_qty = 0;
 $comments = commentsArray($debid);
 if ($following) {
   $followingClass = 'btn-danger disabled';
@@ -119,6 +119,7 @@ echo "
 <link rel="stylesheet" href="includes/bootstrap/css/bootstrap.min.css"/>
 <link rel="stylesheet" href="includes/css/jquery-ui.css"/>
 <link rel="stylesheet" href="includes/style.css"/>
+<link rel="icon" href="includes/favicon.ico"/>
 <script src="includes/jquery-1.7.2.min.js" type="text/javascript"></script>
 <script src="includes/js/jquery-ui-min.js" type="text/javascript"></script>
 <script src="includes/js/jquery.autosize-min.js" type="text/javascript"></script>
@@ -207,7 +208,7 @@ echo "
   // show these boxes only if I am a participant or * this is a public debate *
   if ($is_participant or !$privacy):
   ?>
-  <textarea class="yes" id="comment-yes" placeholder="Speak for the motion" rows=2></textarea>
+  <textarea class="yes" id="comment-yes" placeholder="I agree..." rows=2></textarea>
   <button id="post-yes" class="btn btn-success comment-post-btn" disabled>Post</button>
   <?php
     endif;
@@ -236,7 +237,7 @@ echo "
   <?php
     if ($is_participant or !$privacy):
   ?>
-  <textarea class="no" id="comment-no" placeholder="Speak against the motion" rows=2></textarea>
+  <textarea class="no" id="comment-no" placeholder="I disagree..." rows=2></textarea>
   <button id="post-no" class="btn btn-danger comment-post-btn" disabled>Post</button>
   <?php
     endif;
@@ -260,6 +261,7 @@ echo "
   ?>
   </div>
   </div>
+  <div style="clear: both;"></div>
 </div>
 <div id="mask"></div>
 <div id="overlay" class="window"></div>

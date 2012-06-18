@@ -16,9 +16,9 @@
 include('includes/config.php');
 require_once('includes/facebook.php');
 $facebook = new Facebook(array(
-"appId"   => '253395578066052',
-"secret"  => '23d20951b5546544b2f2e31183e4b5c0',
-"cookie"  => false
+  "appId"   => '253395578066052',
+  "secret"  => '23d20951b5546544b2f2e31183e4b5c0',
+  "cookie"  => false
 ));
 $params = array('next' => 'http://localhost/iitdebates/home.php');
 $user = $facebook->getUser();
@@ -41,6 +41,7 @@ else {
 <title>IIT Debates</title>
 <script src="includes/jquery.min.js" type="text/javascript"></script>
 <script src="includes/script.js" type="text/javascript"></script>
+<link rel="icon" href="includes/favicon.ico"/>
 <link rel="stylesheet" href="includes/bootstrap/css/bootstrap.min.css"/>
 <link rel="stylesheet" href="includes/welcome.css"/>
 </head>

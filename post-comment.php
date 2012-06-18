@@ -16,7 +16,7 @@ $result = mysql_fetch_assoc(mysql_query($query));
    the debate, we will add him. */
 $row = fetchAssoc("SELECT * FROM `debates` WHERE `debid`='$debid'");
 if (strpos($row['participants'], $author) === false) {
-  $participants = $row['participants'] . ',' . $author;
+  $participants = $row['participants'] . $author;
   mysql_query("UPDATE `debates` SET `participants`='$participants' ".
               "WHERE `debid`='$debid'");
 }
