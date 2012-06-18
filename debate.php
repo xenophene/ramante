@@ -66,7 +66,10 @@ else { // get the details & render the page
   $followers = $debate['followers'];
   $fs = explode(',',$followers);
   $follower_names = namesFromIds($fs);
-  $follower_qty = sizeof($fs);
+  if ($followers == '')
+    $follower_qty = 0;
+  else
+    $follower_qty = sizeof($fs);
   $following = false;
   foreach($fs as $f) {
     $p = trim($f);
