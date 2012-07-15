@@ -11,11 +11,11 @@ body {
   line-height: 18px;
   color: #333;
   width: 1000px;
-  min-height: 100%;
   /*-moz-box-shadow: 0 -10px 12px #777;
   -webkit-box-shadow: 0 -10px 12px #777;*/
   border-left: solid 1px #ccc;
   border-right: solid 1px #ccc;
+  border-bottom: solid 1px #ccc;
 }
 #header {
   background: #0074CC;
@@ -66,7 +66,7 @@ span.options ul, span.fb-ju-ab ul {
 span.options ul li, span.fb-ju-ab ul li {
   display: inline;
   text-decoration: none;
-  padding: 16px 4px 7px 4px;
+  padding: 9px 4px 8px 4px;
   margin: 0px;
   color: #fff;
   outline: none;
@@ -88,7 +88,7 @@ span.options ul li.log-out-link:hover,span.fb-ju-ab ul li:hover  {
 span.options ul li a, span.fb-ju-ab ul li a {
   color: #fff;
   text-decoration: none;
-  padding: 10px 5px 10px 5px;
+  padding: 9px 5px 9px 5px;
 }
 #welcome {
   padding: 10px;
@@ -117,6 +117,9 @@ span.emph {
 }
 #profile td.contain-interest {
   padding: 5px 0px 5px 2px;
+}
+#profile td.small {
+  width: 100px;
 }
 #profile span.interest {
   color: #444;
@@ -152,6 +155,9 @@ td.interest-elements-p:hover {
   font-size: 20px;
   cursor: pointer;
 }
+#desc-data {
+  margin:0 0 4px;
+}
 #profile .pic {
   max-height: 250px;
   max-width: 250px;
@@ -169,11 +175,11 @@ td.interest-elements-p:hover {
   padding: 0px;
   margin: 0px;
 }
-#profile button.usr-engage-btn {
+#profile a.usr-engage-btn {
   margin: 3px 0px 3px 0px;
   width: 135px;
 }
-#profile button.usr-engage-btn2, #follow {
+#profile a.usr-engage-btn2, #follow {
   margin: 3px 0px 3px 0px;
   width: 90px;
 }
@@ -201,15 +207,30 @@ td.interest-elements-p:hover {
   padding: 3px 20px 0 0;
   min-height: 100px;
 }
-#profile span.topic {
+#profile div.topic {
   padding: 0 0 5px 0;
   font-size: 20px;
   text-shadow: 1px -2px 3px #eee;
   color: #333;
 }
-#profile span.desc {
+#profile div.desc {
   color: #444;
   font-size: 13px;
+  margin-top: 5px;
+}
+#profile div.deb-themes {
+  color: #666;
+  font-size: 14px;
+  font-style: italic;
+  margin-top: 4px;
+  overflow: auto;
+}
+.deb-themes .theme {
+  padding: 2px;
+  background: #eee;
+  border-radius: 4px;
+  -webkit-border-radius: 4px;
+  -moz-border-radius: 4px;
 }
 #profile .d-details {
   position: absolute;
@@ -217,88 +238,70 @@ td.interest-elements-p:hover {
 }
 #content {
   position: relative;
-  padding: 20px;
-  min-height: 100%;
 }
-#content #yes {
-  float: left;
-  top: 0px;
-  left: 0px;
-  position: absolute;
-  margin: 0px;
+#content .leftcol {
   width: 50%;
-  border-right: 1px solid #eee;
   min-height: 300px;
+  margin-left: -1px;
+  padding: 10px 0 0 0;
+  float: left;
 }
-#content #no {
+#content .rightcol {
   float: right;
-  position: absolute;
-  margin: 0px;
-  top: 0px;
+  margin: 0;
+  padding: 10px 0 0 0;
   right: 0px;
   width: 50%;
-  min-height: 300px;
-}
-#content #my-debates {
-  float: left;
-  width: 50%;
-  border-right: 1px solid #eee;
-  min-height: 300px;
-  margin: 0;
-  top: 0px;
-  position: absolute;
-  margin-left: -20px;
-  padding: 20px 0 0 0;
-}
-#content #my-updates {
-  float: right;
-  position: absolute;
-  margin: 0;
-  padding: 20px 0 0 0;
-  top: 0px;
-  right: 0px;
-  width: 50%;
-  min-height: 300px;
 }
 #content #comments {
   padding: 0;
   margin: 0;
 }
-#content #yes textarea.yes {
+#content #yes textarea.yes, #content #no textarea.no {
   /* border: 1px solid #5ba75b; */
   color: #222;
   margin: 10px 0 0 20px;
   width: 400px;
   font-size: 13px;
 }
-#content .comment-post-btn {
+.rules {
+  color: #222;
+  margin: 0 80px 0 20px;
+  padding: 5px 10px 5px 10px;
+  background: #ffff99;
+}
+.comment-post-btn {
   line-height: 20px;
   margin: 10px 0 0 0;
 }
-#content #comment {
+.comment {
   padding: 0 0 10px 0;
   margin: 10px 15px 10px 20px;
   overflow: auto;
   clear: both;
   border-bottom: 1px solid #eee;
 }
-#content #comment .author {
+.comment .author {
   font-size: 14px;
   color: #333;
   font-weight: bold;
 }
-#content #comment .author img.author-pic {
+.comment .author img.author-pic {
   height: 25px;
   width: 25px;
   padding: 0;
   margin: 1px 5px 4px 0;
 }
-#content #comment .comment-data {
+#content .comment .comment-data {
   font-size: 13px;
   color: #555;
-  width: 100px;
+  text-align: justify;
+  display: block;
 }
-#content #comment .votes {
+.comment-data p {
+  margin: 4px 0 5px 0;
+}
+.comment .votes {
   font-style: italic;
   padding: 0 5px 0 0;
   font-size: 12px;
@@ -306,17 +309,11 @@ td.interest-elements-p:hover {
   color: #777;
   border-right: 1px solid #ccc;
 }
-#content #comment .upvote, .downvote, .support-point, .rebutt-point, .delete-point {
+.upvote, .downvote, .support-point, .rebutt-point, .delete-point, .votes {
   cursor: pointer;
 }
-#content #comment .support-point:hover, .rebutt-point:hover, .delete-point:hover {
+.support-point:hover, .rebutt-point:hover, .delete-point:hover, .votes:hover {
   text-decoration: underline;
-}
-#content #no textarea.no {
-  /* border: 1px solid #da4f49; */
-  color: #222;
-  margin: 10px 0 0 20px;
-  width: 80%;
 }
 #content #update {
   padding: 20px 20px 20px 20px;
@@ -353,42 +350,6 @@ td.interest-elements-p:hover {
 b {
   color: #D14836;
 }
-#mask {
-  position:absolute;
-  left:0;
-  top:0;
-  z-index:10;
-  background-color:#000;
-  display:none;
-}
-#start-debate-form {
-  background:#fff;
-  display:none;
-  width:390px;
-  position:absolute;
-  z-index:12;
-  top:0px;
-  left:0px;
-  border-radius: 4px;
-  -moz-border-radius: 4px;
-  -webkit-border-radius: 4px;
-  padding: 0px;
-  margin: 0px;
-  border: 10px solid #333;
-  overflow: auto;
-}
-#start-debate-form #radio, #start-debate-form #radio2 {
-  text-align: center;
-}
-#start-debate-form #participants {
-  display: none;
-}
-#start-debate-form #cancel-debate {
-  display: none;
-  top: 20px;
-  right: 20px;
-  position: absolute;
-}
 .ui-autocomplete {
 	max-height: 150px;
 	overflow-y: auto;
@@ -397,10 +358,12 @@ b {
 	/* add padding to account for vertical scrollbar */
 	padding-right: 20px;
 }
+#radio, #radio2 {
+}
 /* IE 6 doesn't support max-height
  * we use height instead, but this forces the menu to always be this tall
  */
-* html .ui-autocomplete {
+html .ui-autocomplete {
 	height: 100px;
 }
 p.emph {
@@ -416,35 +379,13 @@ form {
 textarea {
   resize: none;
 }
-#overlay {
-  background:#fff;
-  display:none;
-  max-width:390px;
-  min-height: 200px;
-  min-width: 200px;
-  position:absolute;
-  z-index:12;
-  top:0px;
-  left:0px;
-  border-radius: 4px;
-  -moz-border-radius: 4px;
-  -webkit-border-radius: 4px;
-  padding: 0;
-  margin: 0;
-  border: 10px solid #333;
-  overflow: auto;
-}
-#overlay #cancel-overlay {
-  bottom: 5px;
-  right: 5px;
-  position: absolute;
+.input-xxlarge{width:520px;}
+.clear {
+  clear: both;
 }
 #overlay ul {
   list-style: none;
-  padding: 20px 10px 10px 20px;
-  margin: 0;
-  max-height: 200px;
-  overflow: auto;
+  margin: 0px;
 }
 #overlay ul li {
   display: inline;
@@ -458,4 +399,31 @@ textarea {
   height: 50px;
   width: 50px;
 }
-.input-xxlarge{width:340px;}
+#overlay .conversation0 {
+  border-bottom: solid 1px #eee;
+  width: 450px;
+}
+#overlay .conversation1 {
+  border-bottom: solid 1px #eee;
+  width: 450px;
+  right: 0px;
+}
+.fill {
+  margin-bottom: 0px;
+}
+.cmt {
+  resize: none;
+}
+.contact-margin {
+  margin-top: 20px;
+  padding-top: 10px;
+}
+.reply {
+  margin: 5px 0 5px 0;
+}
+.reply textarea {
+  width: 400px;
+}
+.reply-post-btn {
+  margin: 0 5px 0 0px;
+}

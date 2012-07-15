@@ -2,12 +2,11 @@
 /* return my facebook friends names & ids */
 include('includes/config.php');
 require_once('includes/facebook.php');
-$facebook = new Facebook(array(
-'appId'   => '253395578066052',
-'secret'  => '23d20951b5546544b2f2e31183e4b5c0',
-'cookie'  => true
-));
 $params = array();
+$facebook = new Facebook(array(
+  "appId"   => '267545116676306',
+  "secret"  => '5e33d3900a4253af9159a512ca49b6d1'
+));
 $user = $facebook->getUser();
 /* send the user to login page if he is not correctly logged in */
 if ($user) {

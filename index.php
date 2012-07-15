@@ -16,11 +16,11 @@
 include('includes/config.php');
 require_once('includes/facebook.php');
 $facebook = new Facebook(array(
-  "appId"   => '253395578066052',
-  "secret"  => '23d20951b5546544b2f2e31183e4b5c0',
-  "cookie"  => false
+  "appId"   => '267545116676306',
+  "secret"  => '5e33d3900a4253af9159a512ca49b6d1'
 ));
-$params = array('next' => 'http://localhost/iitdebates/home.php');
+$params = array('scope' => 'publish_stream,publish_actions',
+	              'next'  => 'http://localhost/iitdebates/home.php');
 $user = $facebook->getUser();
 /* redirect the user, if he is already correctly logged in */
 if ($user) {
@@ -32,29 +32,27 @@ if ($user) {
   catch (FacebookApiException $e) {
   }
 }
-else {
-}
 ?>
 <!DOCTYPE html>
 <html>
-<head>
-<title>IIT Debates</title>
-<script src="includes/jquery.min.js" type="text/javascript"></script>
-<script src="includes/script.js" type="text/javascript"></script>
-<link rel="icon" href="includes/favicon.ico"/>
-<link rel="stylesheet" href="includes/bootstrap/css/bootstrap.min.css"/>
-<link rel="stylesheet" href="includes/welcome.css"/>
-</head>
-<body>
-<div id="desc" class="well">
-Have something to ask? Have someone to pick a bone with? Have something to settle? Where is your point of view? <br/><br/>
-<span class="welcome">Well, welcome to <b>IIT Debates</b>.</span><br/><br/>
-Start your own debates, invite your friends to express their views, get rated and compete among your friends. Get invited to popular debates, give your opinions and get noticed. Raise issues close to your heart and your institute and have them settled the <b>right way</b>.<br/><br/>
-  <a href="<?php echo $facebook->getLoginUrl($params);?>" class="btn btn-primary btn-large">Sign in with Facebook</a>
-<ul>
-<li class="first"><a href="#">Join Us</a></li>
-<li class="second"><a href="#">Feedback</a></li>
-<li><a href="#">About</a></li>
-</ul>
-</body>
+  <head>
+    <title>IIT Debates</title>
+    <link rel="icon" href="includes/favicon.ico"/>
+    <link rel="stylesheet" href="includes/bootstrap/css/bootstrap.min.css"/>
+    <link rel="stylesheet" href="includes/welcome.css"/>
+  </head>
+  <body>
+    <div id="desc" class="well">
+      Have something to ask? Have someone to pick a bone with? Have something to settle? Where is your point of view? <br/><br/>
+      <span class="welcome">Well, welcome to <b>IIT Debates</b>.</span><br/><br/>
+      Start your own debates, invite your friends to express their views, get rated and compete among your friends. Get invited to popular debates, give your opinions and get noticed. Raise issues close to your heart and your institute and have them settled the <b>right way</b>.<br/><br/>
+      <a href="<?php echo $facebook->getLoginUrl($params);?>" class="btn btn-primary btn-large">Sign in with Facebook</a>
+      <ul>
+        <li class="first"><a href="fb-ju-ab.php#join-us">Join Us</a></li>
+        <li class="second"><a href="fb-ju-ab.php#feedback">Feedback</a></li>
+        <li><a href="fb-ju-ab.php#about">About</a></li>
+      </ul>
+    </div>
+    <script src="includes/jquery.min.js"></script>
+  </body>
 </html>

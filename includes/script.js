@@ -1,16 +1,4 @@
-/* Some Global data variables that are used throughout */
-var friendNames = null;
-var themes = Array('IIT Mess', 'IIT Politics', 'IIT Academics', 'IIT Hostels', 'IIT Cultural Events', 'IIT Sports Events', 'Nation & Economy');
-var friendIds = null;
-var names = Array();
-var uids = Array();
 /*****************************************/
-function split( val ) {
-  return val.split( /,\s*/ );
-}
-function extractLast( term ) {
-  return split( term ).pop();
-}
 /**
   * Defines a debate on a user clicking start a new debate. This function
   * is the base function. The parameters which are requested:
@@ -18,14 +6,7 @@ function extractLast( term ) {
   * who are challenged for or against this debate, the debate deadline
   */
 function defineDebate() {
-  var winH = $(document).height();
-  var winW = $(document).width();
   var id = '#start-debate-form';
-  $('#mask').css({'width':winW,'height':winH});
-  $('#mask').fadeTo("fast",0.3);
-  $(id).css('top',  winH/2-$(id).height()/2);
-  $(id).css('left', winW/2-$(id).width()/2);
-  $(id).show();
   $( "#debate-theme" ).autocomplete({
     minLength: 3,
     source: function( request, response ) {
@@ -122,6 +103,7 @@ function defineDebate() {
 	    maxResults: 4
     });
   }
+  $(id).modal('show');
 }
 /* submit the form entered so far */
 function submitDebateForm() {
@@ -140,8 +122,7 @@ function submitDebateForm() {
   }
   $('#participants').val(new_participants);
   $('#participant-ids').val(indexes);
-  $('.window').fadeOut();
-  $('form.well').submit();
+  $('#start-debate-form form').submit();
 }
 /* subset of defineDebate for a TARGETTED debate*/
 function defineChallengeDebate() {
@@ -173,8 +154,6 @@ function followUser () {
   }
 }
 function clearDebateForm() {
-  $('.window').hide();
-  $('#mask').hide();
   $('#debate-topic').val('');
   $('#debate-desc').val('');
   $('#debate-theme').val('');
@@ -245,27 +224,12 @@ function clearOverlay() {
   $('.window').hide();
   $('#mask').hide();
 }
-function renderOverlay(id, code) {
-  $(id).html(code);
-  $('li a img').each(function() {
-    $(this).tooltip({
-      title: $(this).attr('title')
-    });
-  });
-  $('#cancel-overlay').click(clearOverlay);
-  var winH = $(document).height();
-  var winW = $(document).width();
-  $('#mask').css({'width':winW,'height':winH});
-  $('#mask').fadeTo("fast",0.3);
-  $(id).css('top',  winH/2-$(id).height()/2);
-  $(id).css('left', winW/2-$(id).width()/2);
-  $(id).show();
-}
 /* show my followees */
 function myFollowees() {
   var pnames = followeeNames.split(',');
   var pids = followeeIds.split(',');
-  var code = '<p style="padding: 20px 20px 10px 20px;" class="emph">Followees</p><ul>';
+  var heading = 'Followees';
+  var code = '<ul>';
   for (var i = 0; i < pnames.length; i++) {
     var s = pnames[i][0] == ' ' ? pnames[i].substr(1) : pnames[i];
     if (s == '')
@@ -274,15 +238,15 @@ function myFollowees() {
     code += '<li id="' + id + '"><a target="_blank" href="https://www.facebook.com/profile.php?id=' + id + '"><img id="' + id + '" title="' + s + '" src="https://graph.facebook.com/' + id + '/picture"/></a></li>';
   }
   code += '</ul>';
-  code += '<a href="#" id="cancel-overlay" class="close">&times;</a>';
   var id = '#overlay';
-  renderOverlay(id, code);
+  renderOverlay(id, heading, code);
 }
 /* show my followers */
 function myFollowers() {
   var pnames = followerNames.split(',');
   var pids = followerIds.split(',');
-  var code = '<p style="padding: 20px 20px 10px 20px;" class="emph">Followers</p><ul>';
+  var heading = 'Followers';
+  var code = '<ul>';
   for (var i = 0; i < pnames.length; i++) {
     var s = pnames[i][0] == ' ' ? pnames[i].substr(1) : pnames[i];
     if (s == '')
@@ -291,14 +255,13 @@ function myFollowers() {
     code += '<li id="' + id + '"><a target="_blank" href="https://www.facebook.com/profile.php?id=' + id + '"><img id="' + id + '" title="' + s + '" src="https://graph.facebook.com/' + id + '/picture"/></a></li>';
   }
   code += '</ul>';
-  code += '<a href="#" id="cancel-overlay" class="close">&times;</a>';
   var id = '#overlay';
-  renderOverlay(id, code);
+  renderOverlay(id, heading, code);
 }
 function popovers() {
   $('.debate-table').popover({
     title: 'The Debate Table',
-    content: 'View your performance on ongoing & past debates'
+    content: 'View performance on ongoing & past debates'
   });
   $('#interested-in').popover({
     title: 'Interested In',
@@ -360,6 +323,7 @@ function popovers() {
     content: "Challenge this person to a new debate",
     placement: 'left'
   });
+  $('#post-to-fb').tooltip();
   $('.add').tooltip({
     title: 'Modify/Add Debating interests'
   });
@@ -408,14 +372,20 @@ function searchSetup() {
       $(this).parent().children('input').val('');
   });
 }
+function postFb() {
+  $(this).toggleClass('active');
+  if ($(this).html() == 'Post to Facebook') {
+    $('#post-to-fb-input').val('Posting to Facebook');
+    $(this).html('Posting to Facebook');
+  }
+  else {
+    $('#post-to-fb-input').val('Post to Facebook');
+    $(this).html('Post to Facebook');
+  }
+}
 $(function() {
   clearDebateForm();
   $('#start').click(defineDebate);
-  $(document).keyup(function(e) {
-    if(e.keyCode == 27 && $('#mask').css('display')!='none') {
-      clearDebateForm();
-    }
-  });
   $('#start-debate-form input').keyup(function() {
     if ($('#debate-topic').val().length > 5 && $('#participants').val().length > 3)
       $('#start-debate').removeAttr('disabled');
@@ -425,8 +395,9 @@ $(function() {
       return;
     location.href = 'debate.php?debid=' + $(this).attr('id');
   });
+  $('#post-to-fb').click(postFb);
   $('#start-debate').click(submitDebateForm);
-  $('#cancel-debate').click(clearDebateForm);
+  $('#start-debate-form').on('hidden', clearDebateForm);
   $('#challenge').click(defineChallengeDebate);
   $('#follow').click(followUser);
   $('#radio').buttonset();

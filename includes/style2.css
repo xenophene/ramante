@@ -1,0 +1,29 @@
+#header {
+  background: #0074CC;
+  color: #FFF;
+  height: 32px;
+  position: relative;
+  z-index: 8;
+}
+span.logo {
+  font-weight: bold;
+  font-size: 22px;
+  position: absolute;
+  text-align: left;
+  left: 50%;
+  margin-left: -68px;
+  padding:7px;
+  a {
+    color:#fff;
+    text-decoration: none;
+  }
+  a:hover {
+    text-decoration: none;
+  }
+}
+.left-col {
+  border-right: solid 1px #eee;
+}
+.right-col {
+  border-left: solid 1px #eee;
+}
